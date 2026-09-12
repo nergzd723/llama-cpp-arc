@@ -1,0 +1,39 @@
+== sycl-grouped-ub512: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra:  env: 
+   up in 22s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1041.57 MiB | graph splits = 171 (with bs=512), 218 (with bs=1)
+   VRAM: (12216 MiB, 2398 MiB free)
+sycl-grouped-ub512 run1: prompt 18 tok @ 13.8 tok/s   decode 256 tok @ 9.12 tok/s
+sycl-grouped-ub512 run2: prompt 18 tok @ 21.4 tok/s   decode 256 tok @ 11.92 tok/s
+sycl-grouped-ub512 prefill1: prompt 4759 tok in 114.4s = 41.6 tok/s | decode 64 tok @ 10.58 tok/s | disk read max 330200 KB/s, mean 69297 KB/s | GPU MHz mean 2663 max 2850
+sycl-grouped-ub512: generated '\n\n<think>\n\n</think>\n\nHere'
+  tok0: '\n\n'=0.9898  '\n'=0.0041  ''=0.0023  '\n\n\n'=0.0006
+  tok1: '<think>'=0.6616  'Below'=0.2499  'Here'=0.0436  '```'=0.0290
+  tok2: '\n\n'=0.9947  '\n'=0.0053  ' \n\n'=0.0000  '\n \n'=0.0000
+  tok3: '</think>'=1.0000  '*'=0.0000  '```'=0.0000  '*('=0.0000
+  tok4: '\n\n'=1.0000  ' a'=0.0000  '\n\n\n'=0.0000  ' to'=0.0000
+  tok5: 'Here'=0.8635  '```'=0.0957  '#'=0.0229  'To'=0.0039
+== sycl-grouped-ub512 done (198s)
+   pos0: same argmax=True  max|dp|=0.006
+   pos1: same argmax=True  max|dp|=0.264
+   pos2: same argmax=True  max|dp|=0.013
+   pos3: same argmax=True  max|dp|=0.000
+   pos4: same argmax=True  max|dp|=0.000
+   pos5: same argmax=True  max|dp|=0.004
+   probe vs CPU reference: max abs prob diff 0.264 -> SUSPECT
+   long-prompt continuation: '\n\n<think>\n\n</think>\n\nHere is the summary of the document in ten bullet points:\n\n*   The repository a'
+== sycl-grouped-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: 
+   up in 54s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 171 (with bs=2048), 218 (with bs=1)
+   VRAM: (12216 MiB, 1973 MiB free)
+sycl-grouped-ub2048 run1: prompt 18 tok @ 10.8 tok/s   decode 256 tok @ 11.18 tok/s
+sycl-grouped-ub2048 run2: prompt 18 tok @ 25.1 tok/s   decode 256 tok @ 13.05 tok/s
+sycl-grouped-ub2048 prefill1: prompt 4759 tok in 97.6s = 48.7 tok/s | decode 64 tok @ 11.74 tok/s | disk read max 269146 KB/s, mean 115153 KB/s | GPU MHz mean 2686 max 2850
+sycl-grouped-ub2048 prefill2: prompt 4759 tok in 64.9s = 73.3 tok/s | decode 64 tok @ 11.13 tok/s | disk read max 47638 KB/s, mean 9814 KB/s | GPU MHz mean 2692 max 2850
+== sycl-grouped-ub2048 done (275s)
+== sycl-grouped-off-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: GGML_SYCL_DISABLE_MOE_GROUPED=1 
+   up in 34s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 171 (with bs=2048), 218 (with bs=1)
+   VRAM: (12216 MiB, 1973 MiB free)
+sycl-grouped-off-ub2048 prefill1: prompt 4759 tok in 121.1s = 39.3 tok/s | decode 64 tok @ 9.14 tok/s | disk read max 408374 KB/s, mean 174309 KB/s | GPU MHz mean 2580 max 2850
+== sycl-grouped-off-ub2048 done (164s)
+BATCH9 DONE

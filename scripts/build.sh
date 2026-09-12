@@ -44,13 +44,17 @@ git status --short ggml/src/ggml-vulkan | head -5
 # Backend-neutral fixes the fork lacks, kept as patches so the tree stays reproducible.
 # Currently: scripts/patches/sycl-moe-cache-negative-ids.patch teaches the SYCL mul_mat_id
 # about the -1 ids of the hot/cold expert split (otherwise the expert cache aborts on SYCL).
+# A patch is applied only when the files it touches are still pristine; once the tree carries
+# local changes there (the patches themselves, or work in progress on top of them) it is left alone.
 for p in "$REPO_ROOT"/scripts/patches/*.patch; do
     [ -e "$p" ] || continue
-    if git apply --reverse --check "$p" >/dev/null 2>&1; then
-        echo "== patch already applied: $(basename "$p")"
-    else
+    files=$(git apply --numstat "$p" | awk '{print $3}')
+    # shellcheck disable=SC2086
+    if git diff --quiet -- $files; then
         echo "== applying patch: $(basename "$p")"
         git apply "$p"
+    else
+        echo "== patch skipped, tree already modified: $(basename "$p")"
     fi
 done
 

@@ -1,0 +1,31 @@
+== build exit 0 after 42s
+== op test: OK lines 3, FAIL lines 0
+== sycl-ggemm2-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: 
+   up in 12s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 171 (with bs=2048), 218 (with bs=1)
+   VRAM: (12216 MiB, 1823 MiB free)
+sycl-ggemm2-ub2048 run1: prompt 18 tok @ 18.1 tok/s   decode 256 tok @ 10.41 tok/s
+sycl-ggemm2-ub2048 run2: prompt 18 tok @ 25.0 tok/s   decode 256 tok @ 11.53 tok/s
+sycl-ggemm2-ub2048 prefill1: prompt 4759 tok in 92.1s = 51.6 tok/s | decode 64 tok @ 9.58 tok/s | disk read max 356648 KB/s, mean 118975 KB/s | GPU MHz mean 2508 max 2850
+sycl-ggemm2-ub2048 prefill2: prompt 4759 tok in 43.1s = 110.4 tok/s | decode 64 tok @ 11.04 tok/s | disk read max 39568 KB/s, mean 6336 KB/s | GPU MHz mean 2394 max 2850
+sycl-ggemm2-ub2048: generated '\n\n<think>\n\n</think>\n\nHere'
+  tok0: '\n\n'=0.9960  ''=0.0010  '\n'=0.0004  '\n\n\n'=0.0003
+  tok1: '<think>'=0.7481  'Below'=0.1901  'Here'=0.0354  '```'=0.0164
+  tok2: '\n\n'=0.9911  '\n'=0.0089  ' \n\n'=0.0000  '\n \n'=0.0000
+  tok3: '</think>'=1.0000  '```'=0.0000  '*'=0.0000  '<think>'=0.0000
+  tok4: '\n\n'=1.0000  ' a'=0.0000  ' to'=0.0000  '\n\n\n'=0.0000
+  tok5: 'Here'=0.8703  '```'=0.0849  '#'=0.0234  '###'=0.0046
+== sycl-ggemm2-ub2048 done (213s)
+   pos0: same argmax=True max|dp|=0.001
+   pos1: same argmax=True max|dp|=0.177
+   pos2: same argmax=True max|dp|=0.009
+   pos3: same argmax=True max|dp|=0.000
+   pos4: same argmax=True max|dp|=0.000
+   pos5: same argmax=True max|dp|=0.015
+   probe vs CPU: max abs prob diff 0.177
+   continuation: '\n\n<think>\n\n</think>\n\nHere is the summary of the document in ten bullet points:\n\n*   The re'
+== sycl-ggemm2-ub512: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra:  env: 
+   up in 52s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1041.57 MiB | graph splits = 171 (with bs=512), 218 (with bs=1)
+   VRAM: (12216 MiB, 2248 MiB free)
+BATCH13 DONE

@@ -1,0 +1,9 @@
+
+
+<think>
+
+</think>
+
+Here is the summary of the document in ten bullet points:
+
+*   The repository aims to run the Qwen3.8 Flash Next MoE model on an Intel Arc B580 GPU using the Vulkan backend, replicating a specific expert cache optimization originally demonstrated on NVIDIA hardware.

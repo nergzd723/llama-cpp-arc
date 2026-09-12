@@ -1,0 +1,27 @@
+== sycl-copyengine-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: GGML_SYCL_DISABLE_MOE_GROUPED=1 
+   up in 32s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 171 (with bs=2048), 218 (with bs=1)
+   VRAM: (12216 MiB, 1973 MiB free)
+sycl-copyengine-ub2048 prefill1: prompt 4759 tok in 100.4s = 47.4 tok/s | decode 64 tok @ 8.92 tok/s | disk read max 435336 KB/s, mean 179997 KB/s | GPU MHz mean 2375 max 2850
+sycl-copyengine-ub2048 prefill2: prompt 4759 tok in 38.4s = 123.8 tok/s | decode 64 tok @ 12.52 tok/s | disk read max 183688 KB/s, mean 26999 KB/s | GPU MHz mean 2202 max 2850
+== sycl-copyengine-ub2048 done (186s)
+== sycl-copyengine-imm-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: GGML_SYCL_DISABLE_MOE_GROUPED=1 
+   up in 26s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 171 (with bs=2048), 218 (with bs=1)
+   VRAM: (12216 MiB, 1973 MiB free)
+sycl-copyengine-imm-ub2048 prefill1: prompt 4759 tok in 64.5s = 73.8 tok/s | decode 64 tok @ 9.96 tok/s | disk read max 420232 KB/s, mean 158570 KB/s | GPU MHz mean 2138 max 2850
+== sycl-copyengine-imm-ub2048 done (98s)
+== sycl-neostaging-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: GGML_SYCL_DISABLE_MOE_GROUPED=1 
+   up in 22s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 171 (with bs=2048), 218 (with bs=1)
+   VRAM: (12216 MiB, 1973 MiB free)
+sycl-neostaging-ub2048 prefill1: prompt 4759 tok in 71.8s = 66.3 tok/s | decode 64 tok @ 10.42 tok/s | disk read max 370270 KB/s, mean 174054 KB/s | GPU MHz mean 2412 max 2850
+== sycl-neostaging-ub2048 done (101s)
+== sycl-picopyengine-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: GGML_SYCL_DISABLE_MOE_GROUPED=1 
+   up in 29s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 171 (with bs=2048), 218 (with bs=1)
+   VRAM: (12216 MiB, 1973 MiB free)
+sycl-picopyengine-ub2048 prefill1: prompt 4759 tok in 99.3s = 47.9 tok/s | decode 64 tok @ 9.86 tok/s | disk read max 425882 KB/s, mean 258333 KB/s | GPU MHz mean 2575 max 2850
+== sycl-picopyengine-ub2048 done (136s)
+BATCH11 DONE
+CHAIN DONE

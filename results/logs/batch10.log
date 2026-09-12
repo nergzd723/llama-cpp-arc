@@ -1,0 +1,15 @@
+[100%] Built target test-backend-ops
+== test-backend-ops built in 24s
+== MUL_MAT_ID on SYCL0, mode=grouped
+   OK lines: 60
+   FAIL lines: 0
+  MUL_MAT_ID(type_a=iq2_s,type_b=f32,n_mats=4,n_used=2,b=0,m=64,n=16,k=768,skip_ids=0): [1;32mOK[0m
+  MUL_MAT_ID(type_a=iq4_nl,type_b=f32,n_mats=4,n_used=2,b=0,m=64,n=16,k=96,skip_ids=0): [1;32mOK[0m
+  MUL_MAT_ID(type_a=iq2_s,type_b=f32,n_mats=4,n_used=4,b=0,m=16,n=10,k=256,skip_ids=0): [1;32mOK[0m
+== MUL_MAT_ID on SYCL0, mode=old
+   OK lines: 60
+   FAIL lines: 0
+  MUL_MAT_ID(type_a=iq2_s,type_b=f32,n_mats=4,n_used=2,b=0,m=64,n=16,k=768,skip_ids=0): [1;32mOK[0m
+  MUL_MAT_ID(type_a=iq4_nl,type_b=f32,n_mats=4,n_used=2,b=0,m=64,n=16,k=96,skip_ids=0): [1;32mOK[0m
+  MUL_MAT_ID(type_a=iq2_s,type_b=f32,n_mats=4,n_used=4,b=0,m=16,n=10,k=256,skip_ids=0): [1;32mOK[0m
+BATCH10 DONE

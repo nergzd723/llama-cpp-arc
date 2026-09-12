@@ -1,0 +1,34 @@
+== build exit 0 after 44s
+-- UI: download dist.tar.gz from b1 failed: "HTTP response code said error"
+-- UI: download dist.tar.gz from b1 failed: "HTTP response code said error"
+== sycl-staged-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: 
+   up in 30s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 171 (with bs=2048), 218 (with bs=1)
+   VRAM: (12216 MiB, 1973 MiB free)
+sycl-staged-ub2048 run1: prompt 18 tok @ 4.7 tok/s   decode 256 tok @ 8.17 tok/s
+sycl-staged-ub2048 run2: prompt 18 tok @ 22.3 tok/s   decode 256 tok @ 12.69 tok/s
+sycl-staged-ub2048 prefill1: prompt 4759 tok in 83.1s = 57.3 tok/s | decode 64 tok @ 10.90 tok/s | disk read max 329460 KB/s, mean 113764 KB/s | GPU MHz mean 2441 max 2850
+sycl-staged-ub2048 prefill2: prompt 4759 tok in 37.1s = 128.3 tok/s | decode 64 tok @ 12.18 tok/s | disk read max 66884 KB/s, mean 11345 KB/s | GPU MHz mean 2461 max 2850
+sycl-staged-ub2048: generated '\n\n<think>\n\n</think>\n\nHere'
+  tok0: '\n\n'=0.9898  '\n'=0.0041  ''=0.0023  '\n\n\n'=0.0006
+  tok1: '<think>'=0.6616  'Below'=0.2499  'Here'=0.0436  '```'=0.0290
+  tok2: '\n\n'=0.9947  '\n'=0.0053  ' \n\n'=0.0000  '\n \n'=0.0000
+  tok3: '</think>'=1.0000  '*'=0.0000  '```'=0.0000  '*('=0.0000
+  tok4: '\n\n'=1.0000  ' a'=0.0000  '\n\n\n'=0.0000  ' to'=0.0000
+  tok5: 'Here'=0.8635  '```'=0.0957  '#'=0.0229  'To'=0.0039
+== sycl-staged-ub2048 done (222s)
+== sycl-unstaged-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: GGML_SYCL_DISABLE_STAGED_UPLOAD=1 
+   up in 34s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 171 (with bs=2048), 218 (with bs=1)
+   VRAM: (12216 MiB, 1973 MiB free)
+sycl-unstaged-ub2048 prefill1: prompt 4759 tok in 63.7s = 74.7 tok/s | decode 64 tok @ 9.56 tok/s | disk read max 327656 KB/s, mean 145236 KB/s | GPU MHz mean 2375 max 2850
+sycl-unstaged-ub2048 prefill2: prompt 4759 tok in 37.1s = 128.2 tok/s | decode 64 tok @ 11.12 tok/s | disk read max 115120 KB/s, mean 18848 KB/s | GPU MHz mean 2202 max 2850
+== sycl-unstaged-ub2048 done (150s)
+== sycl-staged-ub4096: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -b 4096 -ub 4096 env: 
+   up in 28s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 2432.56 MiB | graph splits = 171 (with bs=4096), 218 (with bs=1)
+   VRAM: (12216 MiB, 1007 MiB free)
+sycl-staged-ub4096 prefill1: prompt 4759 tok in 73.4s = 64.8 tok/s | decode 64 tok @ 8.84 tok/s | disk read max 411680 KB/s, mean 223853 KB/s | GPU MHz mean 2572 max 2850
+sycl-staged-ub4096 prefill2: prompt 4759 tok in 31.9s = 149.4 tok/s | decode 64 tok @ 12.09 tok/s | disk read max 145578 KB/s, mean 31416 KB/s | GPU MHz mean 2250 max 2850
+== sycl-staged-ub4096 done (147s)
+BATCH12 DONE
