@@ -1,0 +1,24 @@
+Available devices:
+  SYCL0: Intel(R) Arc(TM) B580 Graphics (12216 MiB, 12153 MiB free)
+  Vulkan0: Intel(R) Arc(tm) B580 Graphics (BMG G21) (12216 MiB, 10938 MiB free)
+== dual-split-ub512: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-dual/bin extra: --device SYCL0,Vulkan0 -ts 1,0 env: GGML_SYCL_OP_OFFLOAD_MIN_BATCH=1000000 GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 20s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 279.07 MiB | graph splits = 218
+   VRAM: (12216 MiB, 2290 MiB free)
+dual-split-ub512 run1: prompt 18 tok @ 13.2 tok/s   decode 256 tok @ 8.46 tok/s
+dual-split-ub512 run2: prompt 18 tok @ 18.6 tok/s   decode 256 tok @ 9.40 tok/s
+dual-split-ub512 prefill1: prompt 4759 tok in 48.6s = 97.8 tok/s | decode 64 tok @ 9.14 tok/s | disk read max 91588 KB/s, mean 13383 KB/s | GPU MHz mean 1629 max 2850
+dual-split-ub512: generated 'ph/////'
+  tok0: 'ph'=0.0190  '您好'=0.0107  'review'=0.0077  'heads'=0.0063
+Traceback (most recent call last):
+  File "<stdin>", line 7, in <module>
+  File "<stdin>", line 7, in <genexpr>
+TypeError: must be real number, not NoneType
+== dual-split-ub512 done (140s)
+== dual-split-ub1024: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-dual/bin extra: --device SYCL0,Vulkan0 -ts 1,0 -ub 1024 env: GGML_SYCL_OP_OFFLOAD_MIN_BATCH=1000000 GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 16s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 558.14 MiB | graph splits = 218
+   VRAM: (12216 MiB, 2055 MiB free)
+dual-split-ub1024 prefill1: prompt 4759 tok in 34.8s = 136.6 tok/s | decode 64 tok @ 8.34 tok/s | disk read max 34582 KB/s, mean 9940 KB/s | GPU MHz mean 1684 max 2850
+== dual-split-ub1024 done (60s)
+== dual-split-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-dual/bin extra: --device SYCL0,Vulkan0 -ts 1,0 -ub 2048 env: GGML_SYCL_OP_OFFLOAD_MIN_BATCH=1000000 GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
