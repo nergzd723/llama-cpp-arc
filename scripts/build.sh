@@ -11,7 +11,7 @@
 #   scripts/build.sh                 # Vulkan build (recommended for Arc B580)
 #   BACKEND=sycl scripts/build.sh    # SYCL build, needs oneAPI, untested here
 #
-# Env overrides: SRC (source dir), JOBS (parallel jobs), LLAMA_CURL (ON/OFF)
+# Env overrides: SRC (source dir), BUILD_DIR (default build), JOBS (parallel jobs), LLAMA_CURL (ON/OFF)
 set -euo pipefail
 
 FORK_URL=https://github.com/thecodacus/llama.cpp
@@ -22,6 +22,7 @@ UPSTREAM_SHA=8c1a25166b6b1339edd635165c7d8fd65326ae82  # upstream merge point of
 REPO_ROOT=$(cd "$(dirname "$0")/.." && pwd)
 SRC=${SRC:-$REPO_ROOT/llama.cpp}
 BACKEND=${BACKEND:-vulkan}
+BUILD_DIR=${BUILD_DIR:-build}
 JOBS=${JOBS:-$(nproc)}
 LLAMA_CURL=${LLAMA_CURL:-OFF}
 
@@ -45,13 +46,13 @@ COMMON=(-DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=OFF -DLLAMA_CURL="$LLAMA_CURL"
 case "$BACKEND" in
     vulkan)
         # Ubuntu deps: cmake build-essential libvulkan-dev glslc spirv-headers glslang-tools mesa-vulkan-drivers vulkan-tools
-        cmake -B build "${COMMON[@]}" -DGGML_VULKAN=ON
+        cmake -B "$BUILD_DIR" "${COMMON[@]}" -DGGML_VULKAN=ON
         ;;
     sycl)
         # Intel oneAPI Base Toolkit required. Not verified in this repo; see README.
         # shellcheck disable=SC1091
         source /opt/intel/oneapi/setvars.sh
-        cmake -B build "${COMMON[@]}" -DGGML_SYCL=ON -DGGML_SYCL_F16=ON \
+        cmake -B "$BUILD_DIR" "${COMMON[@]}" -DGGML_SYCL=ON -DGGML_SYCL_F16=ON \
               -DCMAKE_C_COMPILER=icx -DCMAKE_CXX_COMPILER=icpx
         ;;
     *)
@@ -59,6 +60,6 @@ case "$BACKEND" in
         ;;
 esac
 
-cmake --build build -j"$JOBS" --target llama-server llama-cli llama-bench llama-moe-trace
+cmake --build "$BUILD_DIR" -j"$JOBS" --target llama-server llama-cli llama-bench llama-moe-trace
 echo "== built:"
-ls -1 build/bin/llama-server build/bin/llama-cli build/bin/llama-bench build/bin/llama-moe-trace
+ls -1 "$BUILD_DIR"/bin/llama-server "$BUILD_DIR"/bin/llama-cli "$BUILD_DIR"/bin/llama-bench "$BUILD_DIR"/bin/llama-moe-trace

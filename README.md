@@ -109,4 +109,4 @@ Usable VRAM is about 11.5 GiB. Dense weights take 3.7 GiB, compute buffers about
 - unsloth/Qwen3.8-Flash-Next-GGUF on Hugging Face
 - ggml-org/llama.cpp discussions #12570 and #23313 on Arc B580 Vulkan and SYCL performance
 
-See `docs/analysis.md` for the full analysis of the 47 tok/s claim and the three cache implementations.
+See `docs/analysis.md` for the full analysis of the 47 tok/s claim and the three cache implementations. `CLAUDE.md` is the step-by-step runbook for an agent executing this on the real machine; `results/TEMPLATE.md` is the report it fills in.
