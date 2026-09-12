@@ -56,6 +56,7 @@ The run is documented with server logs and looks genuine. It is a single short-p
 * It carries `--lazy-mode`, `--load-mode`, `--spec-type draft-mtp`, and `llama-moe-trace` (which records routing through the scheduler eval callback, so it is backend-neutral too).
 * Reported for this model: RTX 3060 12 GB, UD-IQ3_XXS, 56 slots plus MTP: 16.6 to 24.4 tok/s.
 * Problem found in this session: `perf` does not compile with `-DGGML_VULKAN=ON`. The Vulkan shader tree is mis-merged. `flash_attn_base.glsl` duplicates two helpers that now live in `fa_types.glsl`, and after removing those, `types.glsl` redefines the TurboQuant macros. The older `fable5/moe-expert-cache` branch (2026-07-24) has the cache but no `qwen4exp` architecture and no `--lazy-mode`, so it cannot load Qwen3.8 anyway. Upstream master has `qwen4exp`, `--lazy-mode` and `draft-mtp`, but no expert cache.
+* Fix verified: the fork's `perf` commit 27c54b4 merged upstream commit 8c1a251 (2026-09-03), and its only Vulkan changes since then are the TurboQuant additions. Restoring `ggml/src/ggml-vulkan` from 8c1a251 on top of 27c54b4 builds cleanly with `-DGGML_VULKAN=ON` (server, cli, bench and moe-trace) in a clean Ubuntu 24.04 container. That is what `scripts/build.sh` in this repo does. Compile-only; nothing was run on an Intel GPU.
 * The two env-var prefill optimizations in the README are CUDA-only.
 
 ### Upstream PR ggml-org/llama.cpp#27861, dynamic LRU cache

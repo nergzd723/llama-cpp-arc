@@ -18,6 +18,8 @@ The fork's default `perf` branch does not compile with `-DGGML_VULKAN=ON`: a lat
 
 The cache code itself is backend-neutral: it picks the first GPU device, allocates the expert packs through the generic backend API, and the graph split is plain `get_rows`, `mul_mat_id` and `add`. The fork's log line says `uploaded to CUDA0` on NVIDIA; on this build it will say `Vulkan0`.
 
+Verification status: `scripts/build.sh` was run in a clean Ubuntu 24.04 container (glslc 2023.8, libvulkan 1.3.275, 4 cores, about 25 minutes). It produced `llama-server`, `llama-cli`, `llama-bench` and `llama-moe-trace` linked against `libggml-vulkan`, and the server exposes `--moe-cache-profile`, `--moe-cache-slots`, `--lazy-mode`, `--load-mode`, `--n-cpu-moe`, `--sched-async-cpu` and `--spec-type draft-mtp`. That container has no GPU, so nothing below the build step has been run on a B580. The first person to run `scripts/verify.sh` on Intel hardware is you.
+
 ## Requirements
 
 Hardware
