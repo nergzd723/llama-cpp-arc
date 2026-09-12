@@ -1,0 +1,27 @@
+
+
+<think>
+
+</think>
+
+# Token Bucket Rate Limiter: Detailed Explanation & Implementation
+
+## How a Token Bucket Rate Limiter Works
+
+### Core Concept
+
+The **token bucket** algorithm is a widely used rate-limiting mechanism that controls the rate at which operations (e.g., API requests, network packets) are allowed to proceed. It works by maintaining a "bucket" of tokens that are replenished at a constant rate. Each operation consumes one (or more) tokens. If there aren't enough tokens, the operation is either delayed or rejected.
+
+### Key Parameters
+
+| Parameter | Description |
+|---|---|
+| **Capacity** (`max_tokens`) | The maximum number of tokens the bucket can hold. This determines the maximum burst size. |
+| **Refill Rate** (`refill_rate`) | The number of tokens added to the bucket per second. This determines the sustained throughput. |
+| **Current Tokens** (`tokens`) | The current number of tokens available in the bucket. |
+| **Last Refill Time** (`last_refill`) | The timestamp of the last time tokens were added, used to calculate how many tokens to add on the next request. |
+
+### Step-by-Step Process
+
+```
+1

@@ -20,6 +20,11 @@ THREADS_BATCH=${THREADS_BATCH:-$(nproc)}   # prefill may use all hardware thread
 SLOTS=${SLOTS:-48}
 CTX=${CTX:-16384}
 
+# Number of MoE layers whose routed experts stay in system RAM (--n-cpu-moe).
+# 99 = all 48 layers on the CPU (the video's setting). Lower it to put whole
+# expert layers into spare VRAM: each layer is ~950 MiB at IQ3_XXS.
+NCPUMOE=${NCPUMOE:-99}
+
 # 0 = keep the CPU cold chain synchronous (the setting you were given).
 # 1 = fork default, overlaps CPU and GPU work, worth a few percent if stable.
 ASYNC_CPU=${ASYNC_CPU:-0}
@@ -33,7 +38,7 @@ PORT=${PORT:-8080}
 
 common_args() {
     local a=(
-        -ngl 99 --n-cpu-moe 99
+        -ngl 99 --n-cpu-moe "$NCPUMOE"
         -t "$THREADS" -tb "$THREADS_BATCH"
         --load-mode mmap
         -fa on -ctk q8_0 -ctv q8_0

@@ -50,8 +50,11 @@ case "$BACKEND" in
         ;;
     sycl)
         # Intel oneAPI Base Toolkit required. Not verified in this repo; see README.
+        # setvars.sh reads unset variables (OCL_ICD_FILENAMES), so relax -u around it
+        set +u
         # shellcheck disable=SC1091
         source /opt/intel/oneapi/setvars.sh
+        set -u
         cmake -B "$BUILD_DIR" "${COMMON[@]}" -DGGML_SYCL=ON -DGGML_SYCL_F16=ON \
               -DCMAKE_C_COMPILER=icx -DCMAKE_CXX_COMPILER=icpx
         ;;

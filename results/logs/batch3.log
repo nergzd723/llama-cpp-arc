@@ -1,0 +1,50 @@
+sched-debug prompt_n 60
+== sched-debug done: 0 split lines
+== cache56-async-nograph: SLOTS=56 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=default extra:  env: GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 6s; init_moe_expert_cache: expert cache: 48 layers x 56 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 1091.57 MiB | graph splits = 147 (with bs=512), 194 (with bs=1)
+   VRAM: (12216 MiB, 1568 MiB free)
+cache56-async-nograph run1: prompt 18 tok @ 6.0 tok/s   decode 256 tok @ 6.14 tok/s
+cache56-async-nograph run2: prompt 18 tok @ 8.2 tok/s   decode 256 tok @ 7.67 tok/s
+cache56-async-nograph prefill1: prompt 4759 tok in 25.7s = 185.5 tok/s | decode 64 tok @ 10.93 tok/s | disk read max 79822 KB/s, mean 17973 KB/s | GPU MHz mean 1772 max 2850
+== cache56-async-nograph done (117s)
+== cache60-async-nograph: SLOTS=60 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=default extra:  env: GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 8s; init_moe_expert_cache: expert cache: 48 layers x 60 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 1091.57 MiB | graph splits = 147 (with bs=512), 194 (with bs=1)
+   VRAM: (12216 MiB, 1242 MiB free)
+cache60-async-nograph run1: prompt 18 tok @ 13.1 tok/s   decode 256 tok @ 7.89 tok/s
+cache60-async-nograph run2: prompt 18 tok @ 8.6 tok/s   decode 256 tok @ 8.42 tok/s
+cache60-async-nograph prefill1: prompt 4759 tok in 24.5s = 194.6 tok/s | decode 64 tok @ 11.18 tok/s | disk read max 49850 KB/s, mean 13480 KB/s | GPU MHz mean 1706 max 2850
+== cache60-async-nograph done (105s)
+== cache48-async-nograph-ub1024: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=default extra: -ub 1024 env: GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 6s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 1283.14 MiB | graph splits = 147 (with bs=1024), 194 (with bs=1)
+   VRAM: (12216 MiB, 2048 MiB free)
+cache48-async-nograph-ub1024 prefill1: prompt 4759 tok in 13.7s = 346.7 tok/s | decode 64 tok @ 11.58 tok/s | disk read max 2474 KB/s, mean 667 KB/s | GPU MHz mean 2507 max 2850
+== cache48-async-nograph-ub1024 done (25s)
+== cache48-async-nograph-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=default extra: -ub 2048 env: GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 6s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 1495.05 MiB | graph splits = 147 (with bs=2048), 194 (with bs=1)
+   VRAM: (12216 MiB, 1857 MiB free)
+cache48-async-nograph-ub2048 prefill1: prompt 4759 tok in 11.9s = 400.7 tok/s | decode 64 tok @ 11.07 tok/s | disk read max 25306 KB/s, mean 6479 KB/s | GPU MHz mean 2444 max 2850
+== cache48-async-nograph-ub2048 done (24s)
+== cache48-async-nograph-tb6: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=default extra:  env: GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 6s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 1091.57 MiB | graph splits = 147 (with bs=512), 194 (with bs=1)
+   VRAM: (12216 MiB, 2220 MiB free)
+cache48-async-nograph-tb6 prefill1: prompt 4759 tok in 18.1s = 262.9 tok/s | decode 64 tok @ 11.16 tok/s | disk read max 4822 KB/s, mean 877 KB/s | GPU MHz mean 2546 max 2850
+== cache48-async-nograph-tb6 done (30s)
+== base-mtp: SLOTS=0 THREADS=auto ASYNC_CPU=1 USE_MTP=1 CTX=16384 BIN=default extra:  env: GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 8s; init_moe_expert_cache: expert cache: 48 layers x 0 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 1091.57 MiB | graph splits = 145 (with bs=512), 98 (with bs=1)
+   VRAM: (12216 MiB, 5902 MiB free)
+base-mtp run1: prompt 18 tok @ 9.4 tok/s   decode 256 tok @ 7.94 tok/s
+base-mtp run2: prompt 18 tok @ 9.0 tok/s   decode 256 tok @ 8.62 tok/s
+== base-mtp done (74s)
+== cache48-async-nograph-mtp-pf: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=1 CTX=16384 BIN=default extra:  env: GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 6s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 1091.57 MiB | graph splits = 147 (with bs=512), 194 (with bs=1)
+   VRAM: (12216 MiB, 1988 MiB free)
+cache48-async-nograph-mtp-pf prefill1: prompt 4759 tok in 27.9s = 170.4 tok/s | decode 64 tok @ 5.77 tok/s | disk read max 58660 KB/s, mean 11474 KB/s | GPU MHz mean 1688 max 2850
+== cache48-async-nograph-mtp-pf done (45s)
+BATCH3 DONE

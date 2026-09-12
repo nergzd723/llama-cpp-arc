@@ -1,0 +1,29 @@
+
+
+<think>
+
+</think>
+
+Here is a robust bash script that accomplishes this task. It uses `find` to locate files and `mv -n` (no-clobber) to ensure existing files are not overwritten.
+
+### The Script: `rename_jpeg_to_jpg.sh`
+
+```bash
+#!/bin/bash
+
+# 1. Define the target directory (default to current directory if not provided)
+TARGET_DIR="${1:-.}"
+
+# 2. Check if the target directory exists
+if [ ! -d "$TARGET_DIR" ]; then
+    echo "Error: Directory '$TARGET_DIR' does not exist."
+    exit 1
+fi
+
+# 3. Find all .jpeg files (case-insensitive) and rename them to .jpg
+#    -type f: Only match regular files
+#    -iname "*.jpeg": Case-insensitive match for .jpeg extension
+#    -exec ... {} \;: Execute the command for each found file
+#    mv -n: Move (rename) but do NOT overwrite existing files
+#    "${1%.jpeg}.jpg": Replace .jpeg with .jpg in the filename
+find "$TARGET_DIR" -type f -iname "*.jpeg" -exec bash -c

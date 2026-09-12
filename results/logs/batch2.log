@@ -1,0 +1,68 @@
+== base-async-pf: SLOTS=0 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=default extra:  env: GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 16s; init_moe_expert_cache: expert cache: 48 layers x 0 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 1091.57 MiB | graph splits = 145 (with bs=512), 98 (with bs=1)
+   VRAM: (12216 MiB, 6133 MiB free)
+base-async-pf prefill1: prompt 4759 tok in 250.7s = 19.0 tok/s | decode 64 tok @ 6.61 tok/s | disk read max 278066 KB/s, mean 38193 KB/s | GPU MHz mean 1894 max 2850
+== base-async-pf done (277s)
+== cache48-nograph-pf: SLOTS=48 THREADS=auto ASYNC_CPU=0 USE_MTP=0 CTX=16384 BIN=default extra:  env: GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 16s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 1091.57 MiB | graph splits = 145 (with bs=512), 98 (with bs=1)
+   VRAM: (12216 MiB, 2220 MiB free)
+cache48-nograph-pf prefill1: prompt 4759 tok in 25.8s = 184.1 tok/s | decode 64 tok @ 9.52 tok/s | disk read max 62510 KB/s, mean 18435 KB/s | GPU MHz mean 2047 max 2850
+== cache48-nograph-pf done (48s)
+== cache48-async-nograph-nopo: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=default extra: --no-op-offload env: GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 6s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 279.07 MiB | graph splits = 100 (with bs=512), 194 (with bs=1)
+   VRAM: (12216 MiB, 2952 MiB free)
+cache48-async-nograph-nopo run1: prompt 18 tok @ 9.2 tok/s   decode 256 tok @ 7.04 tok/s
+cache48-async-nograph-nopo run2: prompt 18 tok @ 9.5 tok/s   decode 256 tok @ 8.18 tok/s
+cache48-async-nograph-nopo prefill1: prompt 4759 tok in 110.7s = 43.0 tok/s | decode 64 tok @ 7.64 tok/s | disk read max 376716 KB/s, mean 73517 KB/s | GPU MHz mean 393 max 2250
+== cache48-async-nograph-nopo done (197s)
+== base-async-nopo: SLOTS=0 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=default extra: --no-op-offload env: GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 16s; init_moe_expert_cache: expert cache: 48 layers x 0 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 243.07 MiB | graph splits = 98
+   VRAM: (12216 MiB, 6897 MiB free)
+base-async-nopo prefill1: prompt 4759 tok in 124.5s = 38.2 tok/s | decode 64 tok @ 6.65 tok/s | disk read max 386040 KB/s, mean 77833 KB/s | GPU MHz mean 418 max 2850
+== base-async-nopo done (150s)
+== ncmoe43-async-nopo: SLOTS=0 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=default extra: --no-op-offload env: GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 16s; init_moe_expert_cache: expert cache: 48 layers x 0 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 8628.61 MiB | Vulkan0 compute buffer size = 243.07 MiB | graph splits = 88
+   VRAM: (12216 MiB, 2566 MiB free)
+ncmoe43-async-nopo run1: prompt 18 tok @ 3.4 tok/s   decode 256 tok @ 5.86 tok/s
+ncmoe43-async-nopo run2: prompt 18 tok @ 10.4 tok/s   decode 256 tok @ 7.99 tok/s
+ncmoe43-async-nopo prefill1: prompt 4759 tok in 115.7s = 41.1 tok/s | decode 64 tok @ 7.08 tok/s | disk read max 307356 KB/s, mean 71445 KB/s | GPU MHz mean 279 max 2600
+== ncmoe43-async-nopo done (224s)
+== cache48-async-nograph-t5: SLOTS=48 THREADS=5 ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=default extra:  env: GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 16s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 1091.57 MiB | graph splits = 147 (with bs=512), 194 (with bs=1)
+   VRAM: (12216 MiB, 2220 MiB free)
+cache48-async-nograph-t5 run1: prompt 18 tok @ 9.5 tok/s   decode 256 tok @ 7.17 tok/s
+cache48-async-nograph-t5 run2: prompt 18 tok @ 10.6 tok/s   decode 256 tok @ 8.36 tok/s
+== cache48-async-nograph-t5 done (86s)
+== cache48-async-nograph-t12: SLOTS=48 THREADS=12 ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=default extra:  env: GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 6s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 1091.57 MiB | graph splits = 147 (with bs=512), 194 (with bs=1)
+   VRAM: (12216 MiB, 2220 MiB free)
+cache48-async-nograph-t12 run1: prompt 18 tok @ 13.3 tok/s   decode 256 tok @ 6.73 tok/s
+cache48-async-nograph-t12 run2: prompt 18 tok @ 8.3 tok/s   decode 256 tok @ 6.13 tok/s
+== cache48-async-nograph-t12 done (90s)
+== cache48-async-nograph-mtp: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=1 CTX=16384 BIN=default extra:  env: GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 12s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 1091.57 MiB | graph splits = 147 (with bs=512), 194 (with bs=1)
+   VRAM: (12216 MiB, 1988 MiB free)
+cache48-async-nograph-mtp run1: prompt 18 tok @ 2.8 tok/s   decode 256 tok @ 6.57 tok/s
+cache48-async-nograph-mtp run2: prompt 18 tok @ 9.5 tok/s   decode 256 tok @ 11.94 tok/s
+== cache48-async-nograph-mtp done (80s)
+== probe-ngl0: SLOTS=0 THREADS=auto ASYNC_CPU=0 USE_MTP=0 CTX=16384 BIN=default extra: -ngl 0 env: GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 10s; init_moe_expert_cache: expert cache: 48 layers x 0 slots, ... uploaded to Vulkan0' in the log
+    | Vulkan0 compute buffer size = 677.68 MiB | graph splits = 1355 (with bs=512), 97 (with bs=1)
+   VRAM: (12216 MiB, 10335 MiB free)
+probe-ngl0: generated '\n\n<think>\n\n</think>\n\nHere'
+  tok0: '\n\n'=0.9955  ''=0.0012  '\n\n\n'=0.0006  '\n'=0.0002
+  tok1: '<think>'=0.9255  'Below'=0.0459  'Here'=0.0174  '```'=0.0041
+  tok2: '\n\n'=0.9817  '\n'=0.0183  ' \n\n'=0.0000  '\n \n'=0.0000
+  tok3: '</think>'=1.0000  '*'=0.0000  '<think>'=0.0000  '```'=0.0000
+  tok4: '\n\n'=1.0000  ' a'=0.0000  '\n\n\n'=0.0000  ' to'=0.0000
+  tok5: 'Here'=0.8649  '```'=0.0996  '#'=0.0222  'To'=0.0030
+== probe-ngl0 done (16s)
+BATCH2 DONE

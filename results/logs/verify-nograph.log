@@ -1,0 +1,7 @@
+cache-off: prompt   17.92 tok/s   decode    7.49 tok/s   tokens 256
+cache-on: prompt   18.24 tok/s   decode    6.21 tok/s   tokens 256
+== OUTPUTS DIFFER: see /mnt/slopper/llama-cpp-arc/verify-out-nograph/resp-cache-*.json.txt
+   retry with GGML_VK_DISABLE_FUSION=1 (Vulkan) or GGML_SYCL_ENABLE_OPT=0 (SYCL); if still different, do not use the cache
+== look for 'init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+0.04.022.008 I init_moe_expert_cache: expert cache: 48 layers x 48 slots, 4347.66 MiB uploaded to Vulkan0
+VERIFY EXIT: 0

@@ -1,0 +1,3 @@
+
+
+Here is a script that walks a directory tree, finds every file ending in `.jpg`, and renames it to `.jpeg` (i.e., changes the extension from .jpg to .jpeg). It skips renaming if a file with the .jpeg name already exists.

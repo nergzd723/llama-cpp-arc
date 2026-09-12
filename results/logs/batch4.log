@@ -1,0 +1,30 @@
+Available devices:
+  SYCL0: Intel(R) Arc(TM) B580 Graphics (12216 MiB, 12153 MiB free)
+== sycl-base: SLOTS=0 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra:  env: 
+   up in 66s; init_moe_expert_cache: expert cache: 48 layers x 0 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1041.57 MiB | graph splits = 169 (with bs=512), 122 (with bs=1)
+   VRAM: (12216 MiB, 6687 MiB free)
+sycl-base run1: prompt 18 tok @ 4.7 tok/s   decode 256 tok @ 6.95 tok/s
+sycl-base run2: prompt 18 tok @ 8.9 tok/s   decode 256 tok @ 9.50 tok/s
+sycl-base prefill1: prompt 4759 tok in 111.6s = 42.6 tok/s | decode 64 tok @ 9.94 tok/s | disk read max 354724 KB/s, mean 100635 KB/s | GPU MHz mean 2512 max 2850
+sycl-base: generated '\n\n<think>\n\n</think>\n\nHere'
+  tok0: '\n\n'=0.9823  ''=0.0104  '\n'=0.0015  '\n\n\n'=0.0015
+  tok1: '<think>'=0.9479  'Below'=0.0266  'Here'=0.0169  '```'=0.0012
+  tok2: '\n\n'=0.9929  '\n'=0.0071  ' \n\n'=0.0000  '\n \n'=0.0000
+  tok3: '</think>'=1.0000  '*'=0.0000  '```'=0.0000  '<think>'=0.0000
+  tok4: '\n\n'=1.0000  ' a'=0.0000  ' to'=0.0000  '\n\n\n'=0.0000
+  tok5: 'Here'=0.8627  '```'=0.0898  '#'=0.0285  'To'=0.0041
+== sycl-base done (256s)
+== sycl-cache48: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra:  env: 
+sycl-cache48: server died:
+/mnt/slopper/llama-cpp-arc/llama.cpp/ggml/src/ggml-sycl/ggml-sycl.cpp:4958: GGML_ASSERT(row_id_i >= 0 && row_id_i < n_as) failed
+#3  0x00007f21d9b0aed9 in ggml_abort () from /mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin/libggml-base.so.0
+== sycl-cache48-mtp: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=1 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra:  env: 
+sycl-cache48-mtp: server died:
+/mnt/slopper/llama-cpp-arc/llama.cpp/ggml/src/ggml-sycl/ggml-sycl.cpp:4958: GGML_ASSERT(row_id_i >= 0 && row_id_i < n_as) failed
+#3  0x00007f307910aed9 in ggml_abort () from /mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin/libggml-base.so.0
+== sycl-cache48-noopt: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra:  env: GGML_SYCL_ENABLE_OPT=0 
+sycl-cache48-noopt: server died:
+/mnt/slopper/llama-cpp-arc/llama.cpp/ggml/src/ggml-sycl/ggml-sycl.cpp:4958: GGML_ASSERT(row_id_i >= 0 && row_id_i < n_as) failed
+#3  0x00007f5d4df0aed9 in ggml_abort () from /mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin/libggml-base.so.0
+BATCH4 DONE

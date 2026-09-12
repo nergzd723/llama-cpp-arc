@@ -1,0 +1,29 @@
+
+
+<think>
+The user wants a detailed explanation of how a token-bucket rate limiter works, followed by a Python implementation. Let me think about what makes a thorough explanation:
+
+1. The analogy and intuition behind token buckets
+2. The core mechanics: bucket capacity, refill rate, token consumption
+3. How it handles bursts vs sustained rates
+4. The algorithm step by step
+5. Edge cases and considerations
+
+For the Python implementation, I should write something clean, well-documented, and practical. I'll include:
+- A class-based implementation
+- Thread safety (since rate limiters are often used in concurrent contexts)
+- Both blocking and non-blocking acquire methods
+- Clear docstrings
+- A demo showing burst behavior and sustained rate limiting
+
+Let me make the explanation thorough but clear, using the water bucket analogy which is the classic one. I'll cover the math behind it too.
+</think>
+
+# Token-Bucket Rate Limiter
+
+## The Intuition
+
+Imagine a **bucket** that holds water (tokens). Two things happen continuously:
+
+1. **Refill:** A faucet drips water into the bucket at a fixed rate (e.g., 10 tokens/second).
+2. **Drain:** Every time

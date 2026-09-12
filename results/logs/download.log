@@ -1,0 +1,9 @@
+Hint: A new version of huggingface_hub (1.31.0) is available! You are using version 1.22.0.
+To update, run: hf update
+The token `oauth-Nergzd723` has been saved to /home/nergzd/.cache/huggingface/stored_tokens
+Access token `oauth-Nergzd723` has been refreshed.
+path=/mnt/slopper/llama-cpp-arc/models
+== done. Model entry point:
+   /mnt/slopper/llama-cpp-arc/models/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf
+   /mnt/slopper/llama-cpp-arc/models/MTP/mtp-Qwen3.8-Flash-Next-shared-Q4_K_M.gguf
+DOWNLOAD EXIT: 0

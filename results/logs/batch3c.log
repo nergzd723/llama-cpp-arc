@@ -1,0 +1,41 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import json,sys; t=json.load(sys.stdin)["timings"]; print("perf-base prompt_n", t["prompt_n"], "prompt tok/s", round(t["prompt_per_second"],1))
+                       ~~~~~~~~~^^^^^^^^^^^
+  File "/usr/lib/python3.14/json/__init__.py", line 298, in load
+    return loads(fp.read(),
+        cls=cls, object_hook=object_hook,
+        parse_float=parse_float, parse_int=parse_int,
+        parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)
+  File "/usr/lib/python3.14/json/__init__.py", line 352, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/usr/lib/python3.14/json/decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/json/decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+== perf-base done
+/tmp/claude-1000/-mnt-slopper/20cce305-b5f9-4087-9cbc-b56eede57845/scratchpad/batch3c.sh: line 21: 48031 Aborted                    (core dumped) SLOTS=$2 ASYNC_CPU=1 GGML_VK_PERF_LOGGER=1 LLAMA_ARG_LOG_VERBOSITY=4 nohup setsid scripts/serve.sh --no-warmup > results/logs/$1.log 2>&1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import json,sys; t=json.load(sys.stdin)["timings"]; print("perf-cache48 prompt_n", t["prompt_n"], "prompt tok/s", round(t["prompt_per_second"],1))
+                       ~~~~~~~~~^^^^^^^^^^^
+  File "/usr/lib/python3.14/json/__init__.py", line 298, in load
+    return loads(fp.read(),
+        cls=cls, object_hook=object_hook,
+        parse_float=parse_float, parse_int=parse_int,
+        parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)
+  File "/usr/lib/python3.14/json/__init__.py", line 352, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/usr/lib/python3.14/json/decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/json/decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+== perf-cache48 done
+/tmp/claude-1000/-mnt-slopper/20cce305-b5f9-4087-9cbc-b56eede57845/scratchpad/batch3c.sh: line 22: 48887 Aborted                    (core dumped) SLOTS=$2 ASYNC_CPU=1 GGML_VK_PERF_LOGGER=1 LLAMA_ARG_LOG_VERBOSITY=4 nohup setsid scripts/serve.sh --no-warmup > results/logs/$1.log 2>&1
+BATCH3C DONE

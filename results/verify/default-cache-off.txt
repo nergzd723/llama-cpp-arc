@@ -1,0 +1,32 @@
+
+
+<think>
+
+</think>
+
+Here is a robust bash script that recursively finds `.jpeg` files, checks for collisions, and renames them safely.
+
+### The Script: `rename_jpeg_to_jpg.sh`
+
+```bash
+#!/bin/bash
+
+# 1. Enable strict error handling and nullglob for safety
+set -euo pipefail
+shopt -s nullglob
+
+# 2. Define the target directory (default to current directory if not provided)
+TARGET_DIR="${1:-.}"
+
+# 3. Find all .jpeg files recursively, handling spaces/special chars in filenames
+#    -print0 outputs null-terminated strings to handle any filename safely
+while IFS= read -r -d '' jpeg_file; do
+    # 4. Construct the new filename by replacing .jpeg with .jpg
+    #    ${var%pattern} removes the shortest match from the end
+    jpg_file="${jpeg_file%.jpeg}.jpg"
+
+    # 5. Check if the target file already exists
+    if [[ -e "$jpg_file" ]]; then
+        echo "SKIP: '$jpeg_file' -> '$jpg_file' (target exists)"
+    else
+        # 6. Rename the file

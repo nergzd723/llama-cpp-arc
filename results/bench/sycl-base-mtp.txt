@@ -1,0 +1,31 @@
+
+
+<think>
+The user wants a detailed explanation of how a token-bucket rate limiter works, followed by a Python implementation. Let me think through this carefully.
+
+Token bucket algorithm:
+- A bucket with a maximum capacity (burst size)
+- Tokens are added to the bucket at a fixed rate (refill rate)
+- Each request consumes one (or more) tokens
+- If there aren't enough tokens, the request is denied (or queued)
+- The bucket never exceeds its maximum capacity
+
+Key parameters:
+- capacity (max tokens in bucket)
+- refill_rate (tokens per second)
+- current tokens (starts at capacity)
+- last refill time (to calculate how many tokens to add)
+
+I should explain:
+1. The intuition/analogy
+2. The mechanics step by step
+3. The parameters and what they control
+4. Edge cases (burst behavior, steady-state throughput)
+5. Comparison to other rate limiters (leaky bucket, fixed window, sliding window)
+
+Then write a clean, well-documented Python implementation with:
+- A TokenBucket class
+- Thread safety (threading.Lock)
+- allow() method
+- Maybe a decorator or context manager
+- A demo

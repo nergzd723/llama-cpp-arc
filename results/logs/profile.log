@@ -1,0 +1,30 @@
+== tracing -> /mnt/slopper/llama-cpp-arc/profiles/qwen38-chat.csv
+ggml_vulkan: Found 1 Vulkan devices:
+ggml_vulkan: 0 = Intel(R) Arc(tm) B580 Graphics (BMG G21) (Intel open-source Mesa driver) | uma: 0 | fp16: 1 | bf16: 1 | fp4: 0 | warp size: 32 | shared memory: 49152 | int dot: 1 | matrix cores: KHR_coopmat
+0.01.190.975 W llama_model_loader: tensor overrides to CPU are used with mmap enabled - consider using --load-mode none for better performance
+0.03.182.180 I cmn          init: llama threadpool init, n_threads = 6
+0.03.182.487 I prompt: 60 tokens, decoding 512
+0.16.134.431 I decoded 0/512
+0.24.069.597 I decoded 64/512
+0.32.151.874 I decoded 128/512
+0.40.756.418 I decoded 192/512
+0.49.012.152 I decoded 256/512
+0.56.919.374 I decoded 320/512
+1.05.217.527 I decoded 384/512
+1.12.683.276 I decoded 448/512
+1.20.661.632 I trace written to /mnt/slopper/llama-cpp-arc/profiles/qwen38-chat.csv
+   rows: 27397
+== tracing -> /mnt/slopper/llama-cpp-arc/profiles/qwen38-code.csv
+ggml_vulkan: Found 1 Vulkan devices:
+ggml_vulkan: 0 = Intel(R) Arc(tm) B580 Graphics (BMG G21) (Intel open-source Mesa driver) | uma: 0 | fp16: 1 | bf16: 1 | fp4: 0 | warp size: 32 | shared memory: 49152 | int dot: 1 | matrix cores: KHR_coopmat
+0.01.188.954 W llama_model_loader: tensor overrides to CPU are used with mmap enabled - consider using --load-mode none for better performance
+0.03.861.508 I cmn          init: llama threadpool init, n_threads = 6
+0.03.861.778 I prompt: 52 tokens, decoding 512
+0.14.375.274 I decoded 0/512
+0.23.968.336 I decoded 64/512
+0.33.047.384 I decoded 128/512
+0.40.844.602 I decoded 192/512
+0.42.482.288 I trace written to /mnt/slopper/llama-cpp-arc/profiles/qwen38-code.csv
+   rows: 12333
+== merged profile: /mnt/slopper/llama-cpp-arc/profiles/qwen38-merged.csv (39730 rows)
+PROFILE EXIT: 0
