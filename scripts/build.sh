@@ -9,7 +9,8 @@
 #
 # Usage:
 #   scripts/build.sh                 # Vulkan build (recommended for Arc B580)
-#   BACKEND=sycl scripts/build.sh    # SYCL build, needs oneAPI, untested here
+#   BACKEND=sycl scripts/build.sh    # SYCL build, needs oneAPI
+#   BACKEND=dual BUILD_DIR=build-dual scripts/build.sh   # Vulkan + SYCL in one binary
 #
 # Env overrides: SRC (source dir), BUILD_DIR (default build), JOBS (parallel jobs), LLAMA_CURL (ON/OFF)
 set -euo pipefail
@@ -71,8 +72,18 @@ case "$BACKEND" in
         cmake -B "$BUILD_DIR" "${COMMON[@]}" -DGGML_SYCL=ON -DGGML_SYCL_F16=ON \
               -DCMAKE_C_COMPILER=icx -DCMAKE_CXX_COMPILER=icpx
         ;;
+    dual)
+        # Vulkan and SYCL in one binary (experiment: decode on SYCL0, prefill offload on Vulkan0).
+        # Run with: --device SYCL0,Vulkan0 -ts 1,0 and GGML_SYCL_OP_OFFLOAD_MIN_BATCH=1000000
+        set +u
+        # shellcheck disable=SC1091
+        source /opt/intel/oneapi/setvars.sh
+        set -u
+        cmake -B "$BUILD_DIR" "${COMMON[@]}" -DGGML_VULKAN=ON -DGGML_SYCL=ON -DGGML_SYCL_F16=ON \
+              -DCMAKE_C_COMPILER=icx -DCMAKE_CXX_COMPILER=icpx
+        ;;
     *)
-        echo "unknown BACKEND=$BACKEND (vulkan|sycl)" >&2; exit 1
+        echo "unknown BACKEND=$BACKEND (vulkan|sycl|dual)" >&2; exit 1
         ;;
 esac
 

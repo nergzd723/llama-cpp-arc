@@ -1,0 +1,5 @@
+
+
+Here is the summary of the document in ten bullet points:
+
+*   **Project Goal:** The repository aims to run the Qwen3.8 Flash Next (177B MoE) model on an Intel Arc B580 GPU with 48 GB of system RAM using the Vulkan backend,

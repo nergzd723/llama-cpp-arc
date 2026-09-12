@@ -1,0 +1,16 @@
+diff --git a/ggml/src/ggml-sycl/ggml-sycl.cpp b/ggml/src/ggml-sycl/ggml-sycl.cpp
+index 268e853..4b8e03b 100644
+--- a/ggml/src/ggml-sycl/ggml-sycl.cpp
++++ b/ggml/src/ggml-sycl/ggml-sycl.cpp
+@@ -6974,7 +6974,10 @@ ggml_backend_reg_t ggml_backend_sycl_reg() {
+         if (!initialized) {
+             initialize_sycl_begining();
+             ggml_backend_sycl_reg_context * ctx = new ggml_backend_sycl_reg_context;
+-            const int min_batch_size = getenv("GGML_OP_OFFLOAD_MIN_BATCH") ? atoi(getenv("GGML_OP_OFFLOAD_MIN_BATCH")) : 32;
++            // GGML_SYCL_OP_OFFLOAD_MIN_BATCH lets the SYCL backend use a threshold of its own, so that in
++            // a build with several GPU backends on one device another backend can take the offloaded ops
++            const char * min_batch_env = getenv("GGML_SYCL_OP_OFFLOAD_MIN_BATCH") ? getenv("GGML_SYCL_OP_OFFLOAD_MIN_BATCH") : getenv("GGML_OP_OFFLOAD_MIN_BATCH");
++            const int min_batch_size = min_batch_env ? atoi(min_batch_env) : 32;
+ 
+             for (int i = 0; i < ggml_sycl_info().device_count; i++) {
+                 ggml_backend_sycl_device_context * dev_ctx = new ggml_backend_sycl_device_context;
