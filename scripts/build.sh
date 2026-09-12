@@ -40,6 +40,19 @@ git fetch --depth 1 "$UPSTREAM_URL" "$UPSTREAM_SHA"
 git checkout FETCH_HEAD -- ggml/src/ggml-vulkan
 git status --short ggml/src/ggml-vulkan | head -5
 
+# Backend-neutral fixes the fork lacks, kept as patches so the tree stays reproducible.
+# Currently: scripts/patches/sycl-moe-cache-negative-ids.patch teaches the SYCL mul_mat_id
+# about the -1 ids of the hot/cold expert split (otherwise the expert cache aborts on SYCL).
+for p in "$REPO_ROOT"/scripts/patches/*.patch; do
+    [ -e "$p" ] || continue
+    if git apply --reverse --check "$p" >/dev/null 2>&1; then
+        echo "== patch already applied: $(basename "$p")"
+    else
+        echo "== applying patch: $(basename "$p")"
+        git apply "$p"
+    fi
+done
+
 COMMON=(-DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=OFF -DLLAMA_CURL="$LLAMA_CURL"
         -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_TOOLS=ON)
 

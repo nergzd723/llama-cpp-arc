@@ -1,0 +1,42 @@
+== threads=6 slots=48 ctx=16384 mtp=0 async_cpu=1
+== look for 'init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+0.00.025.236 W DEPRECATED: argument '-ub' specified multiple times, use comma-separated values instead (only last value will be used)
+0.00.025.542 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.028.549 W srv  llama_server: -----------------
+0.00.028.550 W srv  llama_server: CORS is set to allow all origins ('*') and no API key is set
+0.00.028.550 W srv  llama_server: this can be a security risk (cross-origin attacks)
+0.00.028.551 W srv  llama_server: more info: https://github.com/ggml-org/llama.cpp/pull/25655
+0.00.028.551 W srv  llama_server: -----------------
+0.00.030.449 I srv    load_model: loading model '/mnt/slopper/llama-cpp-arc/models/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf'
+0.00.500.790 W llama_model_loader: tensor overrides to CPU are used with mmap enabled - consider using --load-mode none for better performance
+0.24.898.325 I cmn          init: llama threadpool init, n_threads = 6
+0.25.842.623 W srv    load_model: cache_reuse is not supported by this context, it will be disabled
+0.26.658.851 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 16384, kv_unified = 'false'
+0.26.669.693 W srv          init: chat template supports preserving reasoning, it is enabled by default (may use more tokens, disable via --no-reasoning-preserve)
+0.26.670.245 I srv  llama_server: model loaded
+0.26.670.250 I srv  llama_server: listening on http://127.0.0.1:8080
+0.26.670.250 W srv  llama_server: NOTICE: server default port will be changed to :9931 in a future release
+0.26.670.251 W srv  llama_server:         ref: https://github.com/ggml-org/llama.cpp/pull/26508
+2.26.785.086 I slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = -1
+2.26.785.153 I slot launch_slot_: id  0 | task 0 | processing task, is_child = 0
+2.34.907.902 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =   1993, progress = 0.49, t =   8.12 s / 245.36 tokens per second
+2.42.612.175 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =   3945, progress = 0.98, t =  15.83 s / 249.26 tokens per second
+2.43.457.404 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =   3957, progress = 0.98, t =  16.67 s / 237.34 tokens per second
+2.44.735.461 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =   4037, progress = 1.00, t =  17.95 s / 224.90 tokens per second
+2.55.080.527 I slot print_timing: id  0 | task 0 | n_gen =    100, tg =  10.24 t/s, tg_3s =  10.34 t/s
+2.58.157.741 I slot print_timing: id  0 | task 0 | n_gen =    130, tg =  10.12 t/s, tg_3s =   9.75 t/s
+3.01.232.497 I slot print_timing: id  0 | task 0 | n_gen =    160, tg =  10.05 t/s, tg_3s =   9.76 t/s
+3.04.290.153 I slot print_timing: id  0 | task 0 | n_gen =    190, tg =  10.01 t/s, tg_3s =   9.81 t/s
+3.07.363.092 I slot print_timing: id  0 | task 0 | n_gen =    220, tg =   9.98 t/s, tg_3s =   9.76 t/s
+3.10.424.961 I slot print_timing: id  0 | task 0 | n_gen =    250, tg =   9.95 t/s, tg_3s =   9.80 t/s
+3.13.507.852 I slot print_timing: id  0 | task 0 | n_gen =    280, tg =   9.93 t/s, tg_3s =   9.73 t/s
+3.16.530.262 I slot print_timing: id  0 | task 0 | n_gen =    309, tg =   9.90 t/s, tg_3s =   9.59 t/s
+3.19.547.546 I slot print_timing: id  0 | task 0 | n_gen =    338, tg =   9.87 t/s, tg_3s =   9.61 t/s
+3.22.555.748 I slot print_timing: id  0 | task 0 | n_gen =    367, tg =   9.85 t/s, tg_3s =   9.64 t/s
+3.25.562.453 I slot print_timing: id  0 | task 0 | n_gen =    396, tg =   9.84 t/s, tg_3s =   9.65 t/s
+3.28.562.477 I slot print_timing: id  0 | task 0 | n_gen =    425, tg =   9.83 t/s, tg_3s =   9.67 t/s
+3.31.584.549 I slot print_timing: id  0 | task 0 | n_gen =    454, tg =   9.81 t/s, tg_3s =   9.60 t/s
+3.34.625.271 I slot print_timing: id  0 | task 0 | n_gen =    483, tg =   9.79 t/s, tg_3s =   9.54 t/s
+3.35.672.538 I srv    operator(): operator(): cleaning up before exit...
+3.35.672.613 W srv          stop: cancel task, id_task = 0
+Received second interrupt, terminating immediately.
