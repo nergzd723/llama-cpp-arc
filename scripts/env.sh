@@ -2,7 +2,22 @@
 # Shared settings for profile.sh / serve.sh / verify.sh. Override any of these in the environment.
 
 REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-BIN=${BIN:-$REPO_ROOT/llama.cpp/build/bin}
+# BACKEND=sycl selects the SYCL build (llama.cpp/build-sycl/bin, built with
+# BACKEND=sycl BUILD_DIR=build-sycl scripts/build.sh) and loads the oneAPI environment;
+# the default is the Vulkan build in llama.cpp/build/bin. BIN= overrides either.
+BACKEND=${BACKEND:-vulkan}
+if [ "$BACKEND" = "sycl" ]; then
+    BIN=${BIN:-$REPO_ROOT/llama.cpp/build-sycl/bin}
+    if [ -z "${ONEAPI_ROOT:-}" ] && [ -f /opt/intel/oneapi/setvars.sh ]; then
+        set +u
+        # shellcheck disable=SC1091
+        source /opt/intel/oneapi/setvars.sh > /dev/null 2>&1
+        set -u
+    fi
+    export ONEAPI_DEVICE_SELECTOR=${ONEAPI_DEVICE_SELECTOR:-level_zero:0}
+else
+    BIN=${BIN:-$REPO_ROOT/llama.cpp/build/bin}
+fi
 MODELS=${MODELS:-$REPO_ROOT/models}
 
 MODEL=${MODEL:-$MODELS/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf}
