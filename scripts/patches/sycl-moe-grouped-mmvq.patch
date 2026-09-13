@@ -1,139 +1,270 @@
 diff --git a/ggml/src/ggml-sycl/ggml-sycl.cpp b/ggml/src/ggml-sycl/ggml-sycl.cpp
-index 4b8e03b..68168cf 100644
+index 4b8e03b..38bee8b 100644
 --- a/ggml/src/ggml-sycl/ggml-sycl.cpp
 +++ b/ggml/src/ggml-sycl/ggml-sycl.cpp
-@@ -52,6 +52,7 @@
+@@ -52,6 +52,8 @@
  
  #include "ggml.h"
  #include "ggml-sycl.h"
++#include "moe-xmx.hpp"
 +#include <mutex>
  #include "ggml-impl.h"
  #include "ggml-backend-impl.h"
  
-@@ -4941,6 +4942,119 @@ static bool ggml_sycl_mul_mat_id_mmvq_fused(
-         src1_row_stride, stream);
- }
- 
-+// Grouped MoE path for batched mul_mat_id (prefill): quantize every src1 row once, list the
-+// routed (token, slot) rows sorted by expert, and run one GEMV launch per weight tensor instead
-+// of one small GEMM per expert. ids may contain -1 (hot/cold expert split): those rows are
-+// skipped and their dst rows zeroed. Returns false when the shapes or the type are not handled.
-+static bool ggml_sycl_mul_mat_id_grouped(ggml_backend_sycl_context & ctx, const ggml_tensor * src0,
-+                                         const ggml_tensor * src1, const ggml_tensor * ids,
-+                                         ggml_tensor * dst, const char * ids_host) {
-+    if (getenv("GGML_SYCL_DISABLE_MOE_GROUPED")) {
+@@ -4990,6 +4992,648 @@ static int64_t mmid_counting_sort_rows(
+         }
+     }
+     return n_used;
++<<<<<<< Updated upstream
++=======
++}
++
++// Multi-row MoE GEMV path for batched mul_mat_id (prefill), no fp16 dequantize. The routed
++// rows are gathered in expert order, quantized to Q8_1 once, cut into groups of up to
++// MMID_NCOLS rows per expert, and one launch per weight tensor dots every quantized weight
++// block against its group. ids may contain -1 (hot/cold expert split): those rows are skipped
++// and their dst rows zeroed. Returns false when the shapes or the type are not handled.
++static bool ggml_sycl_mul_mat_id_groups(ggml_backend_sycl_context & ctx, const ggml_tensor * src0,
++                                        const ggml_tensor * src1, const ggml_tensor * ids,
++                                        ggml_tensor * dst, const char * ids_host) {
++    if (getenv("GGML_SYCL_DISABLE_MOE_GROUPS")) {
 +        return false;
++    }
++    {   // one GEMV per row group loses to the GEMM loop past a few rows per expert (measured 70 vs 130 tok/s)
++        static const int64_t max_rows = getenv("GGML_SYCL_MOE_GROUPS_MAX_ROWS") ? atoll(getenv("GGML_SYCL_MOE_GROUPS_MAX_ROWS")) : 8;
++        if (ids->ne[0] * ids->ne[1] > max_rows * src0->ne[2]) {
++            return false;
++        }
 +    }
 +    if (src1->type != GGML_TYPE_F32 || dst->type != GGML_TYPE_F32) {
 +        return false;
 +    }
-+    if (!ggml_is_contiguous(src1) || !ggml_is_contiguous(dst)) {
++    if (!ggml_is_contiguous(src1) || !ggml_is_contiguous(dst) || ids->nb[0] != sizeof(int32_t)) {
 +        return false;
 +    }
-+    const int64_t ne10 = src1->ne[0];
-+    if (ne10 != src0->ne[0] || ne10 % QK8_1 != 0) {
-+        return false;
-+    }
-+    if (ids->nb[0] != sizeof(int32_t)) {
++    const int64_t K = src0->ne[0], M = src0->ne[1], n_as = src0->ne[2];
++    if (src1->ne[0] != K || K % QK8_1 != 0) {
 +        return false;
 +    }
 +    const ggml_tensor_extra_gpu * src0_extra = static_cast<const ggml_tensor_extra_gpu *>(src0->extra);
 +    if (src0_extra && src0_extra->optimized_feature.reorder) {
 +        return false; // reordered (SoA) weights use a different block layout
 +    }
-+    if (!ggml_sycl_mul_mat_vec_q_id_rows_supported(src0->type)) {
++    if (!ggml_sycl_mul_mat_vec_q_id_groups_supported(src0->type)) {
 +        return false;
 +    }
++    const int64_t n_ids = ids->ne[0], n_tokens = ids->ne[1];
++    const int64_t ne11 = src1->ne[1], ne12 = src1->ne[2];
++    if (ne12 != n_tokens || (ne11 != 1 && ne11 != n_ids) || dst->ne[0] != M || dst->ne[1] != n_ids || dst->ne[2] != n_tokens) {
++        return false;
++    }
++    GGML_ASSERT(dst->nb[1] == (size_t) M * sizeof(float));
 +
-+    const int64_t n_as     = src0->ne[2];
-+    const int64_t n_ids    = ids->ne[0];
-+    const int64_t n_tokens = ids->ne[1];
-+    const int64_t ne11     = src1->ne[1];
-+    const int64_t ne12     = src1->ne[2];
-+    if (ne12 != n_tokens || (ne11 != 1 && ne11 != n_ids) || dst->ne[1] != n_ids || dst->ne[2] != n_tokens) {
++    const queue_ptr stream = ctx.stream();
++
++    std::vector<int64_t> counts, offsets;
++    std::vector<mmid_row_mapping> & routed = ctx.mmid_row_mapping_host;
++    const int64_t n_total = n_tokens * n_ids;
++    const int64_t n_used  = mmid_counting_sort_rows(ids, ids_host, n_ids, n_as, n_total, counts, offsets, routed);
++    if (n_used < n_total) {
++        SYCL_CHECK(CHECK_TRY_ERROR(stream->memset(dst->data, 0, ggml_nbytes(dst))));
++    }
++    if (n_used == 0) {
++        return true;
++    }
++
++    // groups of up to MMID_NCOLS rows per expert, in expert order
++    std::vector<mmid_row_group> groups;
++    groups.reserve(n_used / MMID_NCOLS + n_as);
++    for (int64_t e = 0; e < n_as; e++) {
++        for (int64_t r = 0; r < counts[e]; r += MMID_NCOLS) {
++            groups.push_back({ (int32_t) e, (int32_t) (offsets[e] + r), (int32_t) std::min<int64_t>(MMID_NCOLS, counts[e] - r) });
++        }
++    }
++
++    ggml_sycl_pool_alloc<mmid_row_mapping> dev_rows(ctx.pool(), n_used);
++    ggml_sycl_pool_alloc<mmid_row_group>   dev_groups(ctx.pool(), groups.size());
++    SYCL_CHECK(CHECK_TRY_ERROR(stream->memcpy(dev_rows.get(), routed.data(), n_used * sizeof(mmid_row_mapping))));
++    SYCL_CHECK(CHECK_TRY_ERROR(stream->memcpy(dev_groups.get(), groups.data(), groups.size() * sizeof(mmid_row_group))));
++
++    // gather the routed activation rows (fp32, expert order), quantize them to Q8_1 once
++    ggml_sycl_pool_alloc<char> src1_contig(ctx.pool(), (size_t) n_used * K * sizeof(float));
++    const unsigned int max_wg = ggml_sycl_info().max_work_group_sizes[ctx.device];
++    {
++        const char * src1_original = (const char *) src1->data;
++        char * src1_contig_get = src1_contig.get();
++        const mmid_row_mapping * rows_get = dev_rows.get();
++        const size_t nb11 = src1->nb[1], nb12 = src1->nb[2];
++        sycl::range<3> block_dims(1, 1, std::min((unsigned int) K, max_wg));
++        sycl::range<3> grid_dims(1, 1, (size_t) n_used);
++        stream->submit([&](sycl::handler & cgh) {
++            cgh.parallel_for(sycl::nd_range<3>(grid_dims * block_dims, block_dims), [=](sycl::nd_item<3> item_ct1) {
++                k_copy_src1_to_contiguous(src1_original, src1_contig_get, rows_get, ne11, K, nb11, nb12, item_ct1);
++            });
++        });
++    }
++    const int    src1_padded_cols = GGML_PAD((int) K, MATRIX_ROW_PADDING);
++    const size_t bytes_per_qrow   = (size_t) src1_padded_cols * sizeof(block_q8_1) / QK8_1;
++    ggml_sycl_pool_alloc<char> src1_q8(ctx.pool(), (size_t) n_used * bytes_per_qrow);
++    quantize_row_q8_1_sycl<quantize_q8_1>((const float *) src1_contig.get(), src1_q8.get(), (int) K, (int) n_used,
++                                          src1_padded_cols, stream);
++
++    ggml_sycl_pool_alloc<float> dst_contig(ctx.pool(), (size_t) n_used * M);
++    const bool ok = ggml_sycl_mul_mat_vec_q_id_groups(
++        src0->type, src0->data, src1_q8.get(), dev_groups.get(), (int) groups.size(),
++        dst_contig.get(), (int) K, (int) M, src0->nb[2], bytes_per_qrow, stream);
++    GGML_ASSERT(ok);
++
++    // scatter the contiguous result rows back to dst
++    {
++        char * dst_original = (char *) dst->data;
++        const char * dst_contig_get = (const char *) dst_contig.get();
++        const mmid_row_mapping * rows_get = dev_rows.get();
++        const size_t nb1 = dst->nb[1], nb2 = dst->nb[2];
++        sycl::range<3> block_dims(1, 1, std::min((unsigned int) M, max_wg));
++        sycl::range<3> grid_dims(1, 1, (size_t) n_used);
++        stream->submit([&](sycl::handler & cgh) {
++            cgh.parallel_for(sycl::nd_range<3>(grid_dims * block_dims, block_dims), [=](sycl::nd_item<3> item_ct1) {
++                k_copy_dst_from_contiguous(dst_original, dst_contig_get, rows_get, M, nb1, nb2, item_ct1);
++            });
++        });
++    }
++    SYCL_CHECK(CHECK_TRY_ERROR(stream->wait()));
++    return true;
++}
++
++// XMX path for batched mul_mat_id (prefill): routed rows gathered in expert order, converted to
++// fp16 and padded per expert to 32-row tiles; one launch per weight tensor runs the joint_matrix
++// GEMM with the quantized experts decoded in-kernel (see moe-xmx.cpp). ids may contain -1
++// (hot/cold expert split): those rows are skipped and their dst rows zeroed.
++static void k_moe_xmx_gather(const char * __restrict__ src1, sycl::half * __restrict__ a_pad,
++                             const mmid_row_mapping * __restrict__ rows, const int32_t * __restrict__ pad_row,
++                             int64_t ne11, int64_t K, size_t nb11, size_t nb12, const sycl::nd_item<3> & item_ct1) {
++    const int32_t r  = item_ct1.get_group(2);
++    const int32_t i1 = rows[r].i1;
++    const int32_t i2 = rows[r].i2;
++    const float * src = (const float *) (src1 + (i1 % ne11) * nb11 + i2 * nb12);
++    sycl::half *  dst = a_pad + (size_t) pad_row[r] * K;
++    for (int64_t i = item_ct1.get_local_id(2); i < K; i += item_ct1.get_local_range(2)) {
++        dst[i] = (sycl::half) src[i];
++    }
++}
++
++static void k_moe_xmx_scatter(char * __restrict__ dst, const float * __restrict__ c_pad,
++                              const mmid_row_mapping * __restrict__ rows, const int32_t * __restrict__ pad_row,
++                              int64_t M, size_t nb1, size_t nb2, const sycl::nd_item<3> & item_ct1) {
++    const int32_t r   = item_ct1.get_group(2);
++    float *       out = (float *) (dst + rows[r].i1 * nb1 + rows[r].i2 * nb2);
++    const float * src = c_pad + (size_t) pad_row[r] * M;
++    for (int64_t i = item_ct1.get_local_id(2); i < M; i += item_ct1.get_local_range(2)) {
++        out[i] = src[i];
++    }
++}
++
++static bool ggml_sycl_mul_mat_id_xmx(ggml_backend_sycl_context & ctx, const ggml_tensor * src0,
++                                     const ggml_tensor * src1, const ggml_tensor * ids,
++                                     ggml_tensor * dst, const char * ids_host) {
++    if (getenv("GGML_SYCL_DISABLE_MOE_XMX")) {
++        return false;
++    }
++    if (src1->type != GGML_TYPE_F32 || dst->type != GGML_TYPE_F32) {
++        return false;
++    }
++    if (!ggml_is_contiguous(src1) || !ggml_is_contiguous(dst) || !ggml_is_contiguous(src0) || ids->nb[0] != sizeof(int32_t)) {
++        return false;
++    }
++    const ggml_tensor_extra_gpu * src0_extra = static_cast<const ggml_tensor_extra_gpu *>(src0->extra);
++    if (src0_extra && src0_extra->optimized_feature.reorder) {
++        return false;
++    }
++    const int64_t K = src0->ne[0], M = src0->ne[1], n_as = src0->ne[2];
++    if (!ggml_sycl_moe_xmx_supported(src0->type, M, K)) {
++        return false;
++    }
++    const int64_t n_ids = ids->ne[0], n_tokens = ids->ne[1];
++    const int64_t ne11 = src1->ne[1], ne12 = src1->ne[2];
++    if (src1->ne[0] != K || ne12 != n_tokens || (ne11 != 1 && ne11 != n_ids) || dst->ne[0] != M ||
++        dst->ne[1] != n_ids || dst->ne[2] != n_tokens || src0->nb[2] != (size_t) M * src0->nb[1]) {
 +        return false;
 +    }
 +
 +    const queue_ptr stream = ctx.stream();
 +
-+    // routed rows grouped by expert (counting sort), skipping ids < 0
-+    std::vector<int64_t> counts(n_as + 1, 0);
-+    for (int64_t t = 0; t < n_tokens; t++) {
-+        for (int64_t s = 0; s < n_ids; s++) {
-+            const int32_t e = *(const int32_t *) (ids_host + t*ids->nb[1] + s*ids->nb[0]);
-+            if (e < 0) {
-+                continue;
-+            }
-+            GGML_ASSERT(e < n_as);
-+            counts[e + 1]++;
-+        }
-+    }
-+    for (int64_t e = 0; e < n_as; e++) {
-+        counts[e + 1] += counts[e];
-+    }
-+    const int64_t n_routed = counts[n_as];
-+    const int64_t n_total  = n_tokens * n_ids;
-+
-+    // one GEMV per routed row re-reads the expert weights for every row; past a few rows per
-+    // expert the per-expert dequantize + GEMM loop reuses them and wins (measured: 73 vs 130 tok/s
-+    // at 40 rows per expert on a B580). GGML_SYCL_MOE_GROUPED_MAX_ROWS overrides the threshold.
-+    {
-+        static const int64_t max_rows_per_expert = getenv("GGML_SYCL_MOE_GROUPED_MAX_ROWS") ? atoll(getenv("GGML_SYCL_MOE_GROUPED_MAX_ROWS")) : 8;
-+        if (n_routed > max_rows_per_expert * n_as) {
-+            return false;
-+        }
-+    }
-+
-+    if (n_routed < n_total) {
++    std::vector<int64_t> counts, offsets;
++    std::vector<mmid_row_mapping> & routed = ctx.mmid_row_mapping_host;
++    const int64_t n_total = n_tokens * n_ids;
++    const int64_t n_used  = mmid_counting_sort_rows(ids, ids_host, n_ids, n_as, n_total, counts, offsets, routed);
++    if (n_used < n_total) {
 +        SYCL_CHECK(CHECK_TRY_ERROR(stream->memset(dst->data, 0, ggml_nbytes(dst))));
 +    }
-+    if (n_routed == 0) {
++    if (n_used == 0) {
 +        return true;
 +    }
 +
-+    std::vector<mmid_grouped_row> rows(n_routed);
-+    std::vector<int64_t> next(counts.begin(), counts.end() - 1);
-+    for (int64_t t = 0; t < n_tokens; t++) {
-+        for (int64_t s = 0; s < n_ids; s++) {
-+            const int32_t e = *(const int32_t *) (ids_host + t*ids->nb[1] + s*ids->nb[0]);
-+            if (e < 0) {
-+                continue;
-+            }
-+            const int64_t k = next[e]++;
-+            rows[k].expert   = e;
-+            rows[k].src1_row = (int32_t) (ne11 == 1 ? t : t*ne11 + s);
-+            rows[k].dst_row  = (int32_t) (t*n_ids + s);
++    // pad each expert's rows to a multiple of MOE_XMX_TM; one tile per 32 padded rows
++    std::vector<int32_t> pad_row(n_used);
++    std::vector<moe_xmx_tile> tiles;
++    int64_t n_pad = 0;
++    for (int64_t e = 0; e < n_as; e++) {
++        if (counts[e] == 0) {
++            continue;
 +        }
++        for (int64_t r = 0; r < counts[e]; r++) {
++            pad_row[offsets[e] + r] = (int32_t) (n_pad + r);
++        }
++        const int64_t padded = ((counts[e] + MOE_XMX_TM - 1) / MOE_XMX_TM) * MOE_XMX_TM;
++        for (int64_t r = 0; r < padded; r += MOE_XMX_TM) {
++            tiles.push_back({ (int32_t) e, (int32_t) (n_pad + r) });
++        }
++        n_pad += padded;
 +    }
 +
-+    // quantize all src1 rows to Q8_1 once
-+    const int    src1_padded_cols = GGML_PAD((int) ne10, MATRIX_ROW_PADDING);
-+    const size_t bytes_per_qrow   = (size_t) src1_padded_cols * sizeof(block_q8_1) / QK8_1;
-+    ggml_sycl_pool_alloc<char> src1_q8(ctx.pool(), (size_t) ne11 * ne12 * bytes_per_qrow);
-+    quantize_row_q8_1_sycl<quantize_q8_1>((const float *) src1->data, src1_q8.get(), (int) ne10,
-+                                          (int) (ne11 * ne12), src1_padded_cols, stream);
++    ggml_sycl_pool_alloc<mmid_row_mapping> dev_rows(ctx.pool(), n_used);
++    ggml_sycl_pool_alloc<int32_t>          dev_pad_row(ctx.pool(), n_used);
++    ggml_sycl_pool_alloc<moe_xmx_tile>     dev_tiles(ctx.pool(), tiles.size());
++    ggml_sycl_pool_alloc<sycl::half>       a_pad(ctx.pool(), (size_t) n_pad * K);
++    ggml_sycl_pool_alloc<float>            c_pad(ctx.pool(), (size_t) n_pad * M);
++    SYCL_CHECK(CHECK_TRY_ERROR(stream->memcpy(dev_rows.get(), routed.data(), n_used * sizeof(mmid_row_mapping))));
++    SYCL_CHECK(CHECK_TRY_ERROR(stream->memcpy(dev_pad_row.get(), pad_row.data(), n_used * sizeof(int32_t))));
++    SYCL_CHECK(CHECK_TRY_ERROR(stream->memcpy(dev_tiles.get(), tiles.data(), tiles.size() * sizeof(moe_xmx_tile))));
++    SYCL_CHECK(CHECK_TRY_ERROR(stream->memset(a_pad.get(), 0, (size_t) n_pad * K * sizeof(sycl::half))));
 +
-+    ggml_sycl_pool_alloc<mmid_grouped_row> rows_dev(ctx.pool(), n_routed);
-+    SYCL_CHECK(CHECK_TRY_ERROR(stream->memcpy(rows_dev.get(), rows.data(), n_routed * sizeof(mmid_grouped_row))));
++    const unsigned int max_wg = ggml_sycl_info().max_work_group_sizes[ctx.device];
++    {
++        const char * src1_p = (const char *) src1->data;
++        sycl::half * a_pad_p = a_pad.get();
++        const mmid_row_mapping * rows_p = dev_rows.get();
++        const int32_t * pad_row_p = dev_pad_row.get();
++        const size_t nb11 = src1->nb[1], nb12 = src1->nb[2];
++        sycl::range<3> block_dims(1, 1, std::min((unsigned int) K, max_wg));
++        sycl::range<3> grid_dims(1, 1, (size_t) n_used);
++        stream->submit([&](sycl::handler & cgh) {
++            cgh.parallel_for(sycl::nd_range<3>(grid_dims * block_dims, block_dims), [=](sycl::nd_item<3> item_ct1) {
++                k_moe_xmx_gather(src1_p, a_pad_p, rows_p, pad_row_p, ne11, K, nb11, nb12, item_ct1);
++            });
++        });
++    }
 +
-+    const bool ok = ggml_sycl_mul_mat_vec_q_id_rows(
-+        src0->type, src0->data, src1_q8.get(), rows_dev.get(), (int) n_routed,
-+        (float *) dst->data, (int) ne10, (int) src0->ne[1],
-+        /*expert_weight_stride=*/ src0->nb[2], /*src1_row_stride=*/ bytes_per_qrow,
-+        /*dst_row_stride=*/ dst->nb[1], stream);
-+    GGML_ASSERT(ok);
-+    // the host-side vectors are consumed by the memcpy above; make sure the pool buffers outlive the launch
++    ggml_sycl_moe_xmx(src0->type, src0->data, src0->nb[2], a_pad.get(), c_pad.get(), dev_tiles.get(), (int) tiles.size(), M, K, stream);
++
++    {
++        char * dst_p = (char *) dst->data;
++        const float * c_pad_p = c_pad.get();
++        const mmid_row_mapping * rows_p = dev_rows.get();
++        const int32_t * pad_row_p = dev_pad_row.get();
++        const size_t nb1 = dst->nb[1], nb2 = dst->nb[2];
++        sycl::range<3> block_dims(1, 1, std::min((unsigned int) M, max_wg));
++        sycl::range<3> grid_dims(1, 1, (size_t) n_used);
++        stream->submit([&](sycl::handler & cgh) {
++            cgh.parallel_for(sycl::nd_range<3>(grid_dims * block_dims, block_dims), [=](sycl::nd_item<3> item_ct1) {
++                k_moe_xmx_scatter(dst_p, c_pad_p, rows_p, pad_row_p, M, nb1, nb2, item_ct1);
++            });
++        });
++    }
 +    SYCL_CHECK(CHECK_TRY_ERROR(stream->wait()));
 +    return true;
 +}
 +
- // counting sort of the routed rows by expert id (row_id_i, as chosen by the router):
- // builds a projection of a memory layout where each expert's slice is contiguous
- static int64_t mmid_counting_sort_rows(
-@@ -4992,6 +5106,399 @@ static int64_t mmid_counting_sort_rows(
-     return n_used;
- }
- 
 +// Bucketed batched GEMM for mul_mat_id (prefill). Experts are grouped by how many routed
 +// rows they own, rounded up to a power of two; each expert's rows are gathered (already in
 +// fp16) into a slot of that size, so every bucket is one uniform pointer-array batched GEMM.
@@ -525,16 +656,18 @@ index 4b8e03b..68168cf 100644
 +    }
 +    SYCL_CHECK(CHECK_TRY_ERROR(stream->wait()));
 +    return true;
-+}
-+
++>>>>>>> Stashed changes
+ }
+ 
  static void ggml_sycl_mul_mat_id(ggml_backend_sycl_context & ctx,
-                                  ggml_tensor *dst) try {
-     scope_op_debug_print scope_dbg_print(__func__, dst, /*num_src=*/3);
-@@ -5071,6 +5578,15 @@ static void ggml_sycl_mul_mat_id(ggml_backend_sycl_context & ctx,
+@@ -5071,6 +5715,18 @@ static void ggml_sycl_mul_mat_id(ggml_backend_sycl_context & ctx,
              }
          }
      } else {
-+        if (ggml_sycl_mul_mat_id_grouped(ctx, src0, src1, ids, dst, ids_host.data())) {
++        if (ggml_sycl_mul_mat_id_xmx(ctx, src0, src1, ids, dst, ids_host.data())) {
++            return;
++        }
++        if (ggml_sycl_mul_mat_id_groups(ctx, src0, src1, ids, dst, ids_host.data())) {
 +            return;
 +        }
 +        if (ggml_sycl_mul_mat_id_bucketed_gemm(ctx, src0, src1, ids, dst, ids_host.data())) {
@@ -546,7 +679,7 @@ index 4b8e03b..68168cf 100644
          const int64_t n_routed_rows = ids->ne[1] * n_ids;
          ggml_sycl_pool_alloc<char> src1_contiguous(ctx.pool(), sizeof(float)*n_routed_rows*ne10);
          ggml_sycl_pool_alloc<char>  dst_contiguous(ctx.pool(), sizeof(float)*n_routed_rows*ne0);
-@@ -5686,6 +6202,55 @@ static void ggml_backend_sycl_free(ggml_backend_t backend) {
+@@ -5686,6 +6342,55 @@ static void ggml_backend_sycl_free(ggml_backend_t backend) {
      delete backend;
  }
  
@@ -602,7 +735,7 @@ index 4b8e03b..68168cf 100644
  static void ggml_backend_sycl_set_tensor_async(ggml_backend_t backend,
                                                 ggml_tensor *tensor,
                                                 const void *data, size_t offset,
-@@ -5698,6 +6263,9 @@ static void ggml_backend_sycl_set_tensor_async(ggml_backend_t backend,
+@@ -5698,6 +6403,9 @@ static void ggml_backend_sycl_set_tensor_async(ggml_backend_t backend,
  
      GGML_ASSERT(buf->buft == ggml_backend_sycl_buffer_type(sycl_ctx->device) && "unsupported buffer type");
      const queue_ptr stream = sycl_ctx->stream(sycl_ctx->device, 0);
@@ -613,29 +746,31 @@ index 4b8e03b..68168cf 100644
          (stream)->memcpy((char *)tensor->data + offset, data, size)));
  }
 diff --git a/ggml/src/ggml-sycl/mmvq.cpp b/ggml/src/ggml-sycl/mmvq.cpp
-index d89dd92..a76f032 100644
+index d89dd92..002dbb2 100644
 --- a/ggml/src/ggml-sycl/mmvq.cpp
 +++ b/ggml/src/ggml-sycl/mmvq.cpp
-@@ -2751,6 +2751,77 @@ static void launch_mul_mat_vec_q_moe(
+@@ -2751,6 +2751,90 @@ static void launch_mul_mat_vec_q_moe(
      });
  }
  
-+// Grouped variant of mul_mat_vec_q_moe: work-group dimension 1 walks an explicit list of
-+// routed rows (expert, src1 row, dst row) instead of the expert slots of one token.
++// Multi-row variant of mul_mat_vec_q_moe: work-group dimension 1 walks groups of up to
++// MMID_NCOLS routed rows of one expert; each quantized weight block is loaded once and dotted
++// against every row of the group, so weight traffic drops by the group size and no fp16 copy
++// of the experts is ever made.
++
 +template <int qk, int qi, typename block_q_t, int vdr, vec_dot_q_sycl_t vec_dot_q_sycl>
-+static void mul_mat_vec_q_moe_rows(
++static void mul_mat_vec_q_moe_ncols(
 +    const void * __restrict__ vx_base, const void * __restrict__ vy_base,
-+    float * __restrict__ dst_base, const mmid_grouped_row * __restrict__ rows,
++    float * __restrict__ dst_base, const mmid_row_group * __restrict__ groups,
 +    const int ncols, const int nrows,
-+    const size_t expert_weight_stride, const size_t src1_row_stride, const size_t dst_row_stride,
++    const size_t expert_weight_stride, const size_t src1_row_stride,
 +    const sycl::nd_item<3> & item_ct1) {
 +
-+    const int r = item_ct1.get_group(1);
-+    const mmid_grouped_row m = rows[r];
++    const int g = item_ct1.get_group(1);
++    const mmid_row_group grp = groups[g];
 +
-+    const char * vx = (const char *) vx_base + (size_t) m.expert * expert_weight_stride;
-+    const char * vy = (const char *) vy_base + (size_t) m.src1_row * src1_row_stride;
-+    float *      dst = (float *) ((char *) dst_base + (size_t) m.dst_row * dst_row_stride);
++    const char * vx = (const char *) vx_base + (size_t) grp.expert * expert_weight_stride;
++    const char * vy = (const char *) vy_base + (size_t) grp.row0 * src1_row_stride;
 +
 +    const int row = item_ct1.get_group(2) * item_ct1.get_local_range(1) + item_ct1.get_local_id(1);
 +
@@ -646,10 +781,13 @@ index d89dd92..a76f032 100644
 +    const int     blocks_per_row  = ncols / qk;
 +    constexpr int blocks_per_warp = (vdr * WARP_SIZE + qi - 1) / qi;
 +
-+    float tmp = 0.0f;
++    float tmp[MMID_NCOLS];
++#pragma unroll
++    for (int c = 0; c < MMID_NCOLS; c++) {
++        tmp[c] = 0.0f;
++    }
 +
-+    const block_q_t *  x = (const block_q_t *) vx;
-+    const block_q8_1 * y = (const block_q8_1 *) vy;
++    const block_q_t * x = (const block_q_t *) vx;
 +
 +    for (int i = item_ct1.get_local_id(2) / (qi / vdr); i < blocks_per_row; i += blocks_per_warp) {
 +        const int ibx = row * blocks_per_row + i;
@@ -657,36 +795,44 @@ index d89dd92..a76f032 100644
 +
 +        for (size_t elem = 0; elem < qi / vdr; elem += WARP_SIZE) {
 +            const int iqs = elem + vdr * (item_ct1.get_local_id(2) % (qi / vdr));
-+            tmp += vec_dot_q_sycl(&x[ibx], &y[iby], iqs);
++#pragma unroll
++            for (int c = 0; c < MMID_NCOLS; c++) {
++                if (c < grp.n) {
++                    const block_q8_1 * y = (const block_q8_1 *) (vy + (size_t) c * src1_row_stride);
++                    tmp[c] += vec_dot_q_sycl(&x[ibx], &y[iby], iqs);
++                }
++            }
 +        }
 +    }
 +
 +#pragma unroll
-+    for (int mask = WARP_SIZE / 2; mask > 0; mask >>= 1) {
-+        tmp += dpct::permute_sub_group_by_xor(item_ct1.get_sub_group(), tmp, mask);
-+    }
-+
-+    if (item_ct1.get_local_id(2) == 0) {
-+        dst[row] = tmp;
++    for (int c = 0; c < MMID_NCOLS; c++) {
++#pragma unroll
++        for (int mask = WARP_SIZE / 2; mask > 0; mask >>= 1) {
++            tmp[c] += dpct::permute_sub_group_by_xor(item_ct1.get_sub_group(), tmp[c], mask);
++        }
++        if (item_ct1.get_local_id(2) == 0 && c < grp.n) {
++            dst_base[(size_t) (grp.row0 + c) * nrows + row] = tmp[c];
++        }
 +    }
 +}
 +
 +template <int qk, int qi, typename block_q_t, int vdr, vec_dot_q_sycl_t vec_dot_q_sycl>
-+static void launch_mul_mat_vec_q_moe_rows(
-+    const void * vx_base, const void * vy_q8, const mmid_grouped_row * rows_dev, const int n_rows_routed,
-+    float * dst_base, const int ncols, const int nrows,
-+    const size_t expert_weight_stride, const size_t src1_row_stride, const size_t dst_row_stride,
++static void launch_mul_mat_vec_q_moe_ncols(
++    const void * vx_base, const void * vy_q8, const mmid_row_group * groups_dev, const int n_groups,
++    float * dst_contig, const int ncols, const int nrows,
++    const size_t expert_weight_stride, const size_t src1_row_stride,
 +    dpct::queue_ptr stream) {
 +    const int            block_num_y = (nrows + GGML_SYCL_MMV_Y - 1) / GGML_SYCL_MMV_Y;
-+    const sycl::range<3> block_nums(1, (unsigned) n_rows_routed, (unsigned) block_num_y);
++    const sycl::range<3> block_nums(1, (unsigned) n_groups, (unsigned) block_num_y);
 +    const sycl::range<3> block_dims(1, GGML_SYCL_MMV_Y, WARP_SIZE);
 +    stream->submit([&](sycl::handler & cgh) {
 +        cgh.parallel_for(
 +            sycl::nd_range<3>(block_nums * block_dims, block_dims),
 +            [=](sycl::nd_item<3> item) [[sycl::reqd_sub_group_size(WARP_SIZE)]] {
-+                mul_mat_vec_q_moe_rows<qk, qi, block_q_t, vdr, vec_dot_q_sycl>(
-+                    vx_base, vy_q8, dst_base, rows_dev, ncols, nrows,
-+                    expert_weight_stride, src1_row_stride, dst_row_stride, item);
++                mul_mat_vec_q_moe_ncols<qk, qi, block_q_t, vdr, vec_dot_q_sycl>(
++                    vx_base, vy_q8, dst_contig, groups_dev, ncols, nrows,
++                    expert_weight_stride, src1_row_stride, item);
 +            });
 +    });
 +}
@@ -694,7 +840,7 @@ index d89dd92..a76f032 100644
  bool ggml_sycl_mul_mat_vec_q_id(
      enum ggml_type     src0_type,
      const void *       vx_base,
-@@ -2830,6 +2901,124 @@ bool ggml_sycl_mul_mat_vec_q_id(
+@@ -2830,6 +2914,124 @@ bool ggml_sycl_mul_mat_vec_q_id(
                  vx_base, vy, ids_dev, dst_base, ncols, nrows, n_experts_used,
                  expert_weight_stride, dst_row_stride, src1_row_stride, stream);
              return true;
@@ -713,7 +859,7 @@ index d89dd92..a76f032 100644
 +    }
 +}
 +
-+bool ggml_sycl_mul_mat_vec_q_id_rows_supported(enum ggml_type src0_type) {
++bool ggml_sycl_mul_mat_vec_q_id_groups_supported(enum ggml_type src0_type) {
 +    switch (src0_type) {
 +        case GGML_TYPE_Q4_0:
 +        case GGML_TYPE_Q4_1:
@@ -736,120 +882,286 @@ index d89dd92..a76f032 100644
 +    }
 +}
 +
-+bool ggml_sycl_mul_mat_vec_q_id_rows(
-+    enum ggml_type src0_type, const void * vx_base, const void * vy_q8, const mmid_grouped_row * rows_dev,
-+    int n_rows_routed, float * dst_base, int ncols, int nrows,
-+    size_t expert_weight_stride, size_t src1_row_stride, size_t dst_row_stride, dpct::queue_ptr stream) {
++bool ggml_sycl_mul_mat_vec_q_id_groups(
++    enum ggml_type src0_type, const void * vx_base, const void * vy_q8, const mmid_row_group * groups_dev,
++    int n_groups, float * dst_contig, int ncols, int nrows,
++    size_t expert_weight_stride, size_t src1_row_stride, dpct::queue_ptr stream) {
 +    switch (src0_type) {
 +        case GGML_TYPE_Q4_0:
-+            launch_mul_mat_vec_q_moe_rows<QK4_0, QI4_0, block_q4_0, VDR_Q4_0_Q8_1_MMVQ, vec_dot_q4_0_q8_1>(
-+                vx_base, vy_q8, rows_dev, n_rows_routed, dst_base, ncols, nrows,
-+                expert_weight_stride, src1_row_stride, dst_row_stride, stream);
++            launch_mul_mat_vec_q_moe_ncols<QK4_0, QI4_0, block_q4_0, VDR_Q4_0_Q8_1_MMVQ, vec_dot_q4_0_q8_1>(
++                vx_base, vy_q8, groups_dev, n_groups, dst_contig, ncols, nrows,
++                expert_weight_stride, src1_row_stride, stream);
 +            return true;
 +        case GGML_TYPE_Q4_1:
-+            launch_mul_mat_vec_q_moe_rows<QK4_1, QI4_1, block_q4_1, VDR_Q4_1_Q8_1_MMVQ, vec_dot_q4_1_q8_1>(
-+                vx_base, vy_q8, rows_dev, n_rows_routed, dst_base, ncols, nrows,
-+                expert_weight_stride, src1_row_stride, dst_row_stride, stream);
++            launch_mul_mat_vec_q_moe_ncols<QK4_1, QI4_1, block_q4_1, VDR_Q4_1_Q8_1_MMVQ, vec_dot_q4_1_q8_1>(
++                vx_base, vy_q8, groups_dev, n_groups, dst_contig, ncols, nrows,
++                expert_weight_stride, src1_row_stride, stream);
 +            return true;
 +        case GGML_TYPE_Q5_0:
-+            launch_mul_mat_vec_q_moe_rows<QK5_0, QI5_0, block_q5_0, VDR_Q5_0_Q8_1_MMVQ, vec_dot_q5_0_q8_1>(
-+                vx_base, vy_q8, rows_dev, n_rows_routed, dst_base, ncols, nrows,
-+                expert_weight_stride, src1_row_stride, dst_row_stride, stream);
++            launch_mul_mat_vec_q_moe_ncols<QK5_0, QI5_0, block_q5_0, VDR_Q5_0_Q8_1_MMVQ, vec_dot_q5_0_q8_1>(
++                vx_base, vy_q8, groups_dev, n_groups, dst_contig, ncols, nrows,
++                expert_weight_stride, src1_row_stride, stream);
 +            return true;
 +        case GGML_TYPE_Q5_1:
-+            launch_mul_mat_vec_q_moe_rows<QK5_1, QI5_1, block_q5_1, VDR_Q5_1_Q8_1_MMVQ, vec_dot_q5_1_q8_1>(
-+                vx_base, vy_q8, rows_dev, n_rows_routed, dst_base, ncols, nrows,
-+                expert_weight_stride, src1_row_stride, dst_row_stride, stream);
++            launch_mul_mat_vec_q_moe_ncols<QK5_1, QI5_1, block_q5_1, VDR_Q5_1_Q8_1_MMVQ, vec_dot_q5_1_q8_1>(
++                vx_base, vy_q8, groups_dev, n_groups, dst_contig, ncols, nrows,
++                expert_weight_stride, src1_row_stride, stream);
 +            return true;
 +        case GGML_TYPE_Q8_0:
-+            launch_mul_mat_vec_q_moe_rows<QK8_0, QI8_0, block_q8_0, VDR_Q8_0_Q8_1_MMVQ, vec_dot_q8_0_q8_1>(
-+                vx_base, vy_q8, rows_dev, n_rows_routed, dst_base, ncols, nrows,
-+                expert_weight_stride, src1_row_stride, dst_row_stride, stream);
++            launch_mul_mat_vec_q_moe_ncols<QK8_0, QI8_0, block_q8_0, VDR_Q8_0_Q8_1_MMVQ, vec_dot_q8_0_q8_1>(
++                vx_base, vy_q8, groups_dev, n_groups, dst_contig, ncols, nrows,
++                expert_weight_stride, src1_row_stride, stream);
 +            return true;
 +        case GGML_TYPE_Q2_0:
-+            launch_mul_mat_vec_q_moe_rows<QK2_0, QI2_0, block_q2_0, VDR_Q2_0_Q8_1_MMVQ, vec_dot_q2_0_q8_1>(
-+                vx_base, vy_q8, rows_dev, n_rows_routed, dst_base, ncols, nrows,
-+                expert_weight_stride, src1_row_stride, dst_row_stride, stream);
++            launch_mul_mat_vec_q_moe_ncols<QK2_0, QI2_0, block_q2_0, VDR_Q2_0_Q8_1_MMVQ, vec_dot_q2_0_q8_1>(
++                vx_base, vy_q8, groups_dev, n_groups, dst_contig, ncols, nrows,
++                expert_weight_stride, src1_row_stride, stream);
 +            return true;
 +        case GGML_TYPE_Q2_K:
-+            launch_mul_mat_vec_q_moe_rows<QK_K, QI2_K, block_q2_K, VDR_Q2_K_Q8_1_MMVQ, vec_dot_q2_K_q8_1>(
-+                vx_base, vy_q8, rows_dev, n_rows_routed, dst_base, ncols, nrows,
-+                expert_weight_stride, src1_row_stride, dst_row_stride, stream);
++            launch_mul_mat_vec_q_moe_ncols<QK_K, QI2_K, block_q2_K, VDR_Q2_K_Q8_1_MMVQ, vec_dot_q2_K_q8_1>(
++                vx_base, vy_q8, groups_dev, n_groups, dst_contig, ncols, nrows,
++                expert_weight_stride, src1_row_stride, stream);
 +            return true;
 +        case GGML_TYPE_Q3_K:
-+            launch_mul_mat_vec_q_moe_rows<QK_K, QI3_K, block_q3_K, VDR_Q3_K_Q8_1_MMVQ, vec_dot_q3_K_q8_1>(
-+                vx_base, vy_q8, rows_dev, n_rows_routed, dst_base, ncols, nrows,
-+                expert_weight_stride, src1_row_stride, dst_row_stride, stream);
++            launch_mul_mat_vec_q_moe_ncols<QK_K, QI3_K, block_q3_K, VDR_Q3_K_Q8_1_MMVQ, vec_dot_q3_K_q8_1>(
++                vx_base, vy_q8, groups_dev, n_groups, dst_contig, ncols, nrows,
++                expert_weight_stride, src1_row_stride, stream);
 +            return true;
 +        case GGML_TYPE_Q4_K:
-+            launch_mul_mat_vec_q_moe_rows<QK_K, QI4_K, block_q4_K, VDR_Q4_K_Q8_1_MMVQ, vec_dot_q4_K_q8_1>(
-+                vx_base, vy_q8, rows_dev, n_rows_routed, dst_base, ncols, nrows,
-+                expert_weight_stride, src1_row_stride, dst_row_stride, stream);
++            launch_mul_mat_vec_q_moe_ncols<QK_K, QI4_K, block_q4_K, VDR_Q4_K_Q8_1_MMVQ, vec_dot_q4_K_q8_1>(
++                vx_base, vy_q8, groups_dev, n_groups, dst_contig, ncols, nrows,
++                expert_weight_stride, src1_row_stride, stream);
 +            return true;
 +        case GGML_TYPE_Q5_K:
-+            launch_mul_mat_vec_q_moe_rows<QK_K, QI5_K, block_q5_K, VDR_Q5_K_Q8_1_MMVQ, vec_dot_q5_K_q8_1>(
-+                vx_base, vy_q8, rows_dev, n_rows_routed, dst_base, ncols, nrows,
-+                expert_weight_stride, src1_row_stride, dst_row_stride, stream);
++            launch_mul_mat_vec_q_moe_ncols<QK_K, QI5_K, block_q5_K, VDR_Q5_K_Q8_1_MMVQ, vec_dot_q5_K_q8_1>(
++                vx_base, vy_q8, groups_dev, n_groups, dst_contig, ncols, nrows,
++                expert_weight_stride, src1_row_stride, stream);
 +            return true;
 +        case GGML_TYPE_Q6_K:
-+            launch_mul_mat_vec_q_moe_rows<QK_K, QI6_K, block_q6_K, VDR_Q6_K_Q8_1_MMVQ, vec_dot_q6_K_q8_1>(
-+                vx_base, vy_q8, rows_dev, n_rows_routed, dst_base, ncols, nrows,
-+                expert_weight_stride, src1_row_stride, dst_row_stride, stream);
++            launch_mul_mat_vec_q_moe_ncols<QK_K, QI6_K, block_q6_K, VDR_Q6_K_Q8_1_MMVQ, vec_dot_q6_K_q8_1>(
++                vx_base, vy_q8, groups_dev, n_groups, dst_contig, ncols, nrows,
++                expert_weight_stride, src1_row_stride, stream);
 +            return true;
 +        case GGML_TYPE_MXFP4:
-+            launch_mul_mat_vec_q_moe_rows<QK_MXFP4, QI_MXFP4, block_mxfp4, VDR_MXFP4_Q8_1_MMVQ, vec_dot_mxfp4_q8_1>(
-+                vx_base, vy_q8, rows_dev, n_rows_routed, dst_base, ncols, nrows,
-+                expert_weight_stride, src1_row_stride, dst_row_stride, stream);
++            launch_mul_mat_vec_q_moe_ncols<QK_MXFP4, QI_MXFP4, block_mxfp4, VDR_MXFP4_Q8_1_MMVQ, vec_dot_mxfp4_q8_1>(
++                vx_base, vy_q8, groups_dev, n_groups, dst_contig, ncols, nrows,
++                expert_weight_stride, src1_row_stride, stream);
 +            return true;
 +        case GGML_TYPE_NVFP4:
-+            launch_mul_mat_vec_q_moe_rows<QK_NVFP4, QI_NVFP4, block_nvfp4, VDR_NVFP4_Q8_1_MMVQ, vec_dot_nvfp4_q8_1>(
-+                vx_base, vy_q8, rows_dev, n_rows_routed, dst_base, ncols, nrows,
-+                expert_weight_stride, src1_row_stride, dst_row_stride, stream);
++            launch_mul_mat_vec_q_moe_ncols<QK_NVFP4, QI_NVFP4, block_nvfp4, VDR_NVFP4_Q8_1_MMVQ, vec_dot_nvfp4_q8_1>(
++                vx_base, vy_q8, groups_dev, n_groups, dst_contig, ncols, nrows,
++                expert_weight_stride, src1_row_stride, stream);
 +            return true;
 +        case GGML_TYPE_IQ2_S:
-+            launch_mul_mat_vec_q_moe_rows<QK_K, QI2_S/2, block_iq2_s, 1, vec_dot_iq2_s_q8_1>(
-+                vx_base, vy_q8, rows_dev, n_rows_routed, dst_base, ncols, nrows,
-+                expert_weight_stride, src1_row_stride, dst_row_stride, stream);
++            launch_mul_mat_vec_q_moe_ncols<QK_K, QI2_S/2, block_iq2_s, 1, vec_dot_iq2_s_q8_1>(
++                vx_base, vy_q8, groups_dev, n_groups, dst_contig, ncols, nrows,
++                expert_weight_stride, src1_row_stride, stream);
 +            return true;
 +        case GGML_TYPE_IQ4_NL:
-+            launch_mul_mat_vec_q_moe_rows<QK4_NL, QI4_NL, block_iq4_nl, 2, vec_dot_iq4_nl_q8_1>(
-+                vx_base, vy_q8, rows_dev, n_rows_routed, dst_base, ncols, nrows,
-+                expert_weight_stride, src1_row_stride, dst_row_stride, stream);
++            launch_mul_mat_vec_q_moe_ncols<QK4_NL, QI4_NL, block_iq4_nl, 2, vec_dot_iq4_nl_q8_1>(
++                vx_base, vy_q8, groups_dev, n_groups, dst_contig, ncols, nrows,
++                expert_weight_stride, src1_row_stride, stream);
 +            return true;
          default:
              return false;
      }
 diff --git a/ggml/src/ggml-sycl/mmvq.hpp b/ggml/src/ggml-sycl/mmvq.hpp
-index 9d2f564..ac0586d 100644
+index 9d2f564..786053f 100644
 --- a/ggml/src/ggml-sycl/mmvq.hpp
 +++ b/ggml/src/ggml-sycl/mmvq.hpp
-@@ -40,6 +40,29 @@ bool ggml_sycl_mul_mat_vec_q_id(
+@@ -40,6 +40,30 @@ bool ggml_sycl_mul_mat_vec_q_id(
      size_t             src1_row_stride,      // 0 = shared src1, else per-expert stride in bytes
      dpct::queue_ptr    stream);
  
-+// Grouped MoE expert GEMV for batched mul_mat_id (prefill): one launch covers every
-+// routed (token, slot) row. rows_dev lists them, sorted by expert so that consecutive
-+// work-groups share an expert's weights in cache. Returns false if src0_type isn't handled.
-+struct mmid_grouped_row {
-+    int32_t expert;   // index into the stacked expert weights
-+    int32_t src1_row; // row of the pre-quantized src1
-+    int32_t dst_row;  // row of dst
++// Multi-row MoE expert GEMV for batched mul_mat_id (prefill), no fp16 dequantize: every
++// quantized weight block is read once and dotted against up to 8 routed activation rows of
++// the same expert (Q8_1, contiguous, sorted by expert). groups_dev lists those row groups.
++// Returns false if src0_type isn't handled.
++#define MMID_NCOLS 8
++struct mmid_row_group {
++    int32_t expert; // index into the stacked expert weights
++    int32_t row0;   // first row in the contiguous Q8_1 activation buffer and in the contiguous dst
++    int32_t n;      // rows in this group, 1..8
 +};
-+bool ggml_sycl_mul_mat_vec_q_id_rows_supported(enum ggml_type src0_type);
-+bool ggml_sycl_mul_mat_vec_q_id_rows(
++bool ggml_sycl_mul_mat_vec_q_id_groups_supported(enum ggml_type src0_type);
++bool ggml_sycl_mul_mat_vec_q_id_groups(
 +    enum ggml_type            src0_type,
 +    const void *              vx_base,
-+    const void *              vy_q8,
-+    const mmid_grouped_row *  rows_dev,
-+    int                       n_rows_routed,
-+    float *                   dst_base,
++    const void *              vy_q8,           // contiguous Q8_1 rows, stride src1_row_stride bytes
++    const mmid_row_group *    groups_dev,
++    int                       n_groups,
++    float *                   dst_contig,      // row-major [rows x nrows] fp32
 +    int                       ncols,
 +    int                       nrows,
 +    size_t                    expert_weight_stride,
 +    size_t                    src1_row_stride,
-+    size_t                    dst_row_stride,
 +    dpct::queue_ptr           stream);
 +
  // Reorder (SoA) variant of the fused MoE expert GEMV.
  // vx_base: each expert slice (stride expert_weight_stride == src0->nb[2]) is a self-contained reorder/SoA layout.
  // vy: src1 quantized with quantize_and_reorder_q8_1_soa (per-row SoA). Returns false if src0_type isn't handled.
+diff --git a/ggml/src/ggml-sycl/moe-xmx.cpp b/ggml/src/ggml-sycl/moe-xmx.cpp
+new file mode 100644
+index 0000000..3d6a73a6
+--- /dev/null
++++ b/ggml/src/ggml-sycl/moe-xmx.cpp
+@@ -0,0 +1,128 @@
++#include "moe-xmx.hpp"
++#include "ggml.h"
++#include "dequantize.hpp"
++#include <sycl/ext/oneapi/matrix/matrix.hpp>
++
++using namespace sycl::ext::oneapi::experimental::matrix;
++
++static constexpr int TM  = MOE_XMX_TM;
++static constexpr int TN  = MOE_XMX_TN;
++static constexpr int TK  = 32;  // K elements decoded per step: one IQ4_NL block, one IQ2_S sub-block
++static constexpr int SGS = 16;  // sub-group size required by XMX
++static constexpr int NSG = TM / 8;
++
++// decode 32 consecutive elements [k0, k0+32) of one weight row into fp16
++template <typename block_t> struct moe_xmx_decoder;
++
++template <> struct moe_xmx_decoder<block_iq4_nl> {
++    static constexpr int K_BLOCK = QK4_NL;
++    static __dpct_inline__ void decode32(const block_iq4_nl * row_blocks, int k0, sycl::half * out) {
++        const block_iq4_nl & b = row_blocks[k0 / QK4_NL];
++        const float d = (float) b.d;
++#pragma unroll
++        for (int j = 0; j < 16; j++) {
++            out[j]      = (sycl::half) (d * kvalues_iq4nl[b.qs[j] & 0xf]);
++            out[j + 16] = (sycl::half) (d * kvalues_iq4nl[b.qs[j] >> 4]);
++        }
++    }
++};
++
++template <> struct moe_xmx_decoder<block_iq2_s> {
++    static constexpr int K_BLOCK = QK_K;
++    static __dpct_inline__ void decode32(const block_iq2_s * row_blocks, int k0, sycl::half * out) {
++        const block_iq2_s & b = row_blocks[k0 / QK_K];
++        const int ib = (k0 % QK_K) / 32;
++        const float d = (float) b.d;
++        const uint8_t sc = b.scales[ib];
++#pragma unroll
++        for (int il = 0; il < 4; il++) {
++            const uint8_t * g = (const uint8_t *) (iq2s_grid + (b.qs[4*ib + il] | ((b.qh[ib] << (8 - 2*il)) & 0x300)));
++            const float dl = d * (0.5f + ((sc >> (4 * (il / 2))) & 0xf)) * 0.25f;
++            const uint8_t signs = b.qs[QK_K/8 + 4*ib + il];
++#pragma unroll
++            for (int j = 0; j < 8; j++) {
++                out[8*il + j] = (sycl::half) (dl * g[j] * ((signs & kmask_iq2xs[j]) ? -1.f : 1.f));
++            }
++        }
++    }
++};
++
++template <typename block_t>
++static void moe_xmx_launch(const void * vx_base, size_t expert_stride_bytes, const sycl::half * A, float * C,
++                           const moe_xmx_tile * tiles, int n_tiles, int64_t M, int64_t K, dpct::queue_ptr stream) {
++    const int n_tiles_n     = (int) (M / TN);
++    const int blocks_per_row = (int) (K / moe_xmx_decoder<block_t>::K_BLOCK);
++    const int Ki = (int) K, Mi = (int) M;
++    stream->submit([&](sycl::handler & h) {
++        sycl::local_accessor<sycl::half, 1> Bs(TN * TK, h); // packed: (TK/2) rows of TN*2 halves
++        h.parallel_for(sycl::nd_range<2>(sycl::range<2>(n_tiles, (size_t) n_tiles_n * NSG * SGS), sycl::range<2>(1, NSG * SGS)),
++            [=](sycl::nd_item<2> it) [[sycl::reqd_sub_group_size(SGS)]] {
++                const moe_xmx_tile td = tiles[it.get_group(0)];
++                const int tn   = it.get_group(1);
++                const int lid  = it.get_local_id(1);
++                const int sgid = lid / SGS;
++                sycl::sub_group sg = it.get_sub_group();
++
++                const block_t *    Wexp = (const block_t *) ((const char *) vx_base + (size_t) td.expert * expert_stride_bytes);
++                const sycl::half * Arow = A + (size_t) (td.row0 + sgid * 8) * Ki;
++
++                joint_matrix<sycl::sub_group, float, use::accumulator, 8, 16> acc[TN / 16];
++#pragma unroll
++                for (int j = 0; j < TN / 16; j++) {
++                    joint_matrix_fill(sg, acc[j], 0.0f);
++                }
++
++                sycl::half * bs = Bs.get_multi_ptr<sycl::access::decorated::no>().get();
++                const block_t * row_blocks = Wexp + (size_t) (tn * TN + lid) * blocks_per_row;
++                for (int k0 = 0; k0 < Ki; k0 += TK) {
++                    {
++                        sycl::half vals[TK];
++                        moe_xmx_decoder<block_t>::decode32(row_blocks, k0, vals);
++#pragma unroll
++                        for (int k = 0; k < TK; k++) {
++                            bs[(k / 2) * (TN * 2) + lid * 2 + (k % 2)] = vals[k];
++                        }
++                    }
++                    it.barrier(sycl::access::fence_space::local_space);
++#pragma unroll
++                    for (int s = 0; s < TK / 16; s++) {
++                        joint_matrix<sycl::sub_group, sycl::half, use::a, 8, 16, layout::row_major> a;
++                        joint_matrix_load(sg, a, sycl::address_space_cast<sycl::access::address_space::global_space, sycl::access::decorated::no>(Arow + k0 + 16 * s), Ki);
++#pragma unroll
++                        for (int j = 0; j < TN / 16; j++) {
++                            joint_matrix<sycl::sub_group, sycl::half, use::b, 16, 16, layout::ext_intel_packed> b;
++                            joint_matrix_load(sg, b, Bs.get_multi_ptr<sycl::access::decorated::no>() + (8 * s) * (TN * 2) + (16 * j) * 2, TN * 2);
++                            joint_matrix_mad(sg, acc[j], a, b, acc[j]);
++                        }
++                    }
++                    it.barrier(sycl::access::fence_space::local_space);
++                }
++                float * Crow = C + (size_t) (td.row0 + sgid * 8) * Mi + tn * TN;
++#pragma unroll
++                for (int j = 0; j < TN / 16; j++) {
++                    joint_matrix_store(sg, acc[j], sycl::address_space_cast<sycl::access::address_space::global_space, sycl::access::decorated::no>(Crow + 16 * j), Mi, layout::row_major);
++                }
++            });
++    });
++}
++
++bool ggml_sycl_moe_xmx_supported(enum ggml_type src0_type, int64_t M, int64_t K) {
++    if (M % TN != 0 || K % TK != 0) {
++        return false;
++    }
++    switch (src0_type) {
++        case GGML_TYPE_IQ2_S:  return K % QK_K == 0;
++        case GGML_TYPE_IQ4_NL: return true;
++        default:               return false;
++    }
++}
++
++void ggml_sycl_moe_xmx(enum ggml_type src0_type, const void * vx_base, size_t expert_stride_bytes,
++                       const sycl::half * A, float * C, const moe_xmx_tile * tiles, int n_tiles,
++                       int64_t M, int64_t K, dpct::queue_ptr stream) {
++    switch (src0_type) {
++        case GGML_TYPE_IQ2_S:  moe_xmx_launch<block_iq2_s>(vx_base, expert_stride_bytes, A, C, tiles, n_tiles, M, K, stream); break;
++        case GGML_TYPE_IQ4_NL: moe_xmx_launch<block_iq4_nl>(vx_base, expert_stride_bytes, A, C, tiles, n_tiles, M, K, stream); break;
++        default: GGML_ABORT("moe_xmx: unsupported type");
++    }
++}
+diff --git a/ggml/src/ggml-sycl/moe-xmx.hpp b/ggml/src/ggml-sycl/moe-xmx.hpp
+new file mode 100644
+index 0000000..369e938
+--- /dev/null
++++ b/ggml/src/ggml-sycl/moe-xmx.hpp
+@@ -0,0 +1,25 @@
++#ifndef GGML_SYCL_MOE_XMX_HPP
++#define GGML_SYCL_MOE_XMX_HPP
++
++#include "common.hpp"
++
++// MoE expert GEMM on Intel XMX (joint_matrix fp16 -> fp32) for batched mul_mat_id: the quantized
++// expert weights are decoded in-kernel into a packed local-memory tile shared by 32 activation
++// rows, so every weight element is decoded once per 32 rows instead of once per row.
++#define MOE_XMX_TM 32   // activation rows per work-group
++#define MOE_XMX_TN 64   // weight rows per work-group
++
++struct moe_xmx_tile {
++    int32_t expert; // index into the stacked expert weights
++    int32_t row0;   // first (padded) row of this 32-row tile in the fp16 activation buffer and in the fp32 output
++};
++
++bool ggml_sycl_moe_xmx_supported(enum ggml_type src0_type, int64_t M, int64_t K);
++
++// A: fp16 activations, row-major [rows x K], rows padded per expert to a multiple of MOE_XMX_TM.
++// C: fp32 output, row-major [rows x M]. tiles: one entry per 32-row tile.
++void ggml_sycl_moe_xmx(enum ggml_type src0_type, const void * vx_base, size_t expert_stride_bytes,
++                       const sycl::half * A, float * C, const moe_xmx_tile * tiles, int n_tiles,
++                       int64_t M, int64_t K, dpct::queue_ptr stream);
++
++#endif

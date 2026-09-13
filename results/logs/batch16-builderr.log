@@ -1,0 +1,7 @@
+== build exit 2 after 23s
+/mnt/slopper/llama-cpp-arc/llama.cpp/ggml/src/ggml-sycl/ggml-sycl.cpp:5046:29: error: use of undeclared identifier 'MMID_NCOLS'
+/mnt/slopper/llama-cpp-arc/llama.cpp/ggml/src/ggml-sycl/ggml-sycl.cpp:5048:49: error: use of undeclared identifier 'MMID_NCOLS'
+/mnt/slopper/llama-cpp-arc/llama.cpp/ggml/src/ggml-sycl/ggml-sycl.cpp:5049:101: error: use of undeclared identifier 'MMID_NCOLS'
+1 warning and 3 errors generated.
+build failed
+BATCH16 DONE
