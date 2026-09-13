@@ -1,0 +1,500 @@
+== threads=6 slots=48 ctx=16384 mtp=0 async_cpu=0
+== look for 'init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+0.00.123.788 W DEPRECATED: argument '-ub' specified multiple times, use comma-separated values instead (only last value will be used)
+0.00.123.933 I cmn  common_param: common_params_print_info: build 1 (27c54b4) with GNU 16.1.1 for Linux x86_64
+0.00.123.936 I cmn  common_param: common_params_print_info: verbosity = 4 (adjust with the `-lv N` CLI arg)
+0.00.123.936 I cmn  common_param: device_info:
+0.00.124.149 I cmn  common_param:   - Vulkan0 : Intel(R) Arc(tm) B580 Graphics (BMG G21) (12216 MiB, 10965 MiB free)
+0.00.124.156 I cmn  common_param:   - CPU     : Intel(R) Core(TM) i5-10400F CPU @ 2.90GHz (48064 MiB, 48064 MiB free)
+0.00.124.210 I cmn  common_param: system_info: n_threads = 6 (n_threads_batch = 6) / 12 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | 
+0.00.124.246 I srv          init: running without SSL
+0.00.124.315 I srv          init: using 11 threads for HTTP server
+0.00.124.720 W srv  llama_server: -----------------
+0.00.124.722 W srv  llama_server: CORS is set to allow all origins ('*') and no API key is set
+0.00.124.722 W srv  llama_server: this can be a security risk (cross-origin attacks)
+0.00.124.722 W srv  llama_server: more info: https://github.com/ggml-org/llama.cpp/pull/25655
+0.00.124.722 W srv  llama_server: -----------------
+0.00.124.739 I srv         start: binding port with default address family
+0.00.125.983 I srv    load_model: loading model '/mnt/slopper/llama-cpp-arc/models/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf'
+0.00.125.986 I srv    load_model: local path '/mnt/slopper/llama-cpp-arc/models/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf'
+0.00.217.603 I llama_model_loader: additional 2 GGUFs metadata loaded.
+0.00.217.622 I llama_model_loader: loaded meta data with 67 key-value pairs and 1224 tensors from /mnt/slopper/llama-cpp-arc/models/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf (version GGUF V3 (latest))
+0.00.217.776 I llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+0.00.217.786 I llama_model_loader: - kv   0:                       general.architecture str              = qwen4exp
+0.00.217.788 I llama_model_loader: - kv   1:                               general.type str              = model
+0.00.217.790 I llama_model_loader: - kv   2:                     general.sampling.top_k i32              = 20
+0.00.217.808 I llama_model_loader: - kv   3:                     general.sampling.top_p f32              = 0.950000
+0.00.217.810 I llama_model_loader: - kv   4:                      general.sampling.temp f32              = 1.000000
+0.00.217.812 I llama_model_loader: - kv   5:                               general.name str              = Qwen3.8 Flash Next
+0.00.217.813 I llama_model_loader: - kv   6:                        general.description str              = A Preview of the Qwen4 Architecture
+0.00.217.814 I llama_model_loader: - kv   7:                         general.size_label str              = 512x56B
+0.00.217.815 I llama_model_loader: - kv   8:                       qwen4exp.block_count u32              = 48
+0.00.217.815 I llama_model_loader: - kv   9:                    qwen4exp.context_length u32              = 262144
+0.00.217.816 I llama_model_loader: - kv  10:                  qwen4exp.embedding_length u32              = 2560
+0.00.217.816 I llama_model_loader: - kv  11:              qwen4exp.attention.head_count u32              = 24
+0.00.217.817 I llama_model_loader: - kv  12:           qwen4exp.attention.head_count_kv u32              = 2
+0.00.217.839 I llama_model_loader: - kv  13:           qwen4exp.rope.dimension_sections arr[i32,4]       = [11, 11, 10, 0]
+0.00.217.842 I llama_model_loader: - kv  14:                    qwen4exp.rope.freq_base f32              = 10000000.000000
+0.00.217.844 I llama_model_loader: - kv  15:  qwen4exp.attention.layer_norm_rms_epsilon f32              = 0.000001
+0.00.217.845 I llama_model_loader: - kv  16:                      qwen4exp.expert_count u32              = 512
+0.00.217.845 I llama_model_loader: - kv  17:                 qwen4exp.expert_used_count u32              = 10
+0.00.217.846 I llama_model_loader: - kv  18:              qwen4exp.attention.key_length u32              = 256
+0.00.217.847 I llama_model_loader: - kv  19:            qwen4exp.attention.value_length u32              = 256
+0.00.217.847 I llama_model_loader: - kv  20:        qwen4exp.expert_feed_forward_length u32              = 640
+0.00.217.848 I llama_model_loader: - kv  21: qwen4exp.expert_shared_feed_forward_length u32              = 640
+0.00.217.849 I llama_model_loader: - kv  22:                   qwen4exp.ssm.conv_kernel u32              = 4
+0.00.217.849 I llama_model_loader: - kv  23:                    qwen4exp.ssm.state_size u32              = 128
+0.00.217.850 I llama_model_loader: - kv  24:                   qwen4exp.ssm.group_count u32              = 16
+0.00.217.850 I llama_model_loader: - kv  25:                qwen4exp.ssm.time_step_rank u32              = 48
+0.00.217.851 I llama_model_loader: - kv  26:                    qwen4exp.ssm.inner_size u32              = 6144
+0.00.217.851 I llama_model_loader: - kv  27:           qwen4exp.full_attention_interval u32              = 4
+0.00.217.852 I llama_model_loader: - kv  28:              qwen4exp.rope.dimension_count u32              = 64
+0.00.217.852 I llama_model_loader: - kv  29:            qwen4exp.hyper_connection.count u32              = 4
+0.00.217.853 I llama_model_loader: - kv  30:         qwen4exp.hyper_connection.low_rank u32              = 320
+0.00.217.854 I llama_model_loader: - kv  31:      qwen4exp.attention.indexer.head_count u32              = 4
+0.00.217.854 I llama_model_loader: - kv  32:      qwen4exp.attention.indexer.key_length u32              = 128
+0.00.217.855 I llama_model_loader: - kv  33:           qwen4exp.attention.indexer.top_k u32              = 2048
+0.00.217.861 I llama_model_loader: - kv  34:         qwen4exp.attention.compress_ratios arr[i32,48]      = [0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, ...
+0.00.217.863 I llama_model_loader: - kv  35:                        qwen4exp.ple.layers arr[i32,1]       = [1]
+0.00.217.863 I llama_model_loader: - kv  36:                    qwen4exp.ple.ngram_size u32              = 3
+0.00.217.864 I llama_model_loader: - kv  37:               qwen4exp.ple.heads_per_ngram u32              = 8
+0.00.217.865 I llama_model_loader: - kv  38:                   qwen4exp.ple.conv_kernel u32              = 4
+0.00.217.865 I llama_model_loader: - kv  39:                  qwen4exp.ple.eos_token_id u32              = 248044
+0.00.217.866 I llama_model_loader: - kv  40:  qwen4exp.embedding_length_per_layer_input u32              = 160
+0.00.217.868 I llama_model_loader: - kv  41:             qwen4exp.ple.layer_multipliers arr[u64,3]       = [23703573157769, 20109073645365, 8052...
+0.00.217.871 I llama_model_loader: - kv  42:                  qwen4exp.ple.head_offsets arr[u64,16]      = [0, 20000003, 40000026, 60000059, 800...
+0.00.217.874 I llama_model_loader: - kv  43:              qwen4exp.ple.head_vocab_sizes arr[u64,16]      = [20000003, 20000023, 20000033, 200000...
+0.00.217.875 I llama_model_loader: - kv  44:                       tokenizer.ggml.model str              = gpt2
+0.00.217.876 I llama_model_loader: - kv  45:                         tokenizer.ggml.pre str              = qwen35
+0.00.256.357 I llama_model_loader: - kv  46:                      tokenizer.ggml.tokens arr[str,248320]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+0.00.266.229 I llama_model_loader: - kv  47:                  tokenizer.ggml.token_type arr[i32,248320]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+0.00.305.536 I llama_model_loader: - kv  48:                      tokenizer.ggml.merges arr[str,247587]  = ["Ġ Ġ", "ĠĠ ĠĠ", "i n", "Ġ t",...
+0.00.305.545 I llama_model_loader: - kv  49:                tokenizer.ggml.eos_token_id u32              = 248046
+0.00.305.546 I llama_model_loader: - kv  50:            tokenizer.ggml.padding_token_id u32              = 248044
+0.00.305.547 I llama_model_loader: - kv  51:                tokenizer.ggml.bos_token_id u32              = 248044
+0.00.305.548 I llama_model_loader: - kv  52:               tokenizer.ggml.add_bos_token bool             = false
+0.00.305.552 I llama_model_loader: - kv  53:                    tokenizer.chat_template str              = {%- set image_count = namespace(value...
+0.00.305.553 I llama_model_loader: - kv  54:                qwen4exp.ple.image_token_id u32              = 248056
+0.00.305.553 I llama_model_loader: - kv  55:                       general.quantized_by str              = Unsloth
+0.00.305.554 I llama_model_loader: - kv  56:                           general.repo_url str              = https://huggingface.co/unsloth
+0.00.305.560 I llama_model_loader: - kv  57:                               general.tags arr[str,1]       = ["unsloth"]
+0.00.305.560 I llama_model_loader: - kv  58:               general.quantization_version u32              = 2
+0.00.305.561 I llama_model_loader: - kv  59:                          general.file_type u32              = 23
+0.00.305.563 I llama_model_loader: - kv  60:                      quantize.imatrix.file str              = Qwen3.8-Flash-Next-GGUF/imatrix_unslo...
+0.00.305.564 I llama_model_loader: - kv  61:                   quantize.imatrix.dataset str              = unsloth_calibration_Qwen3.8-Flash-Nex...
+0.00.305.564 I llama_model_loader: - kv  62:             quantize.imatrix.entries_count u32              = 926
+0.00.305.565 I llama_model_loader: - kv  63:              quantize.imatrix.chunks_count u32              = 45
+0.00.305.566 I llama_model_loader: - kv  64:                                   split.no u16              = 0
+0.00.305.567 I llama_model_loader: - kv  65:                        split.tensors.count i32              = 1224
+0.00.305.567 I llama_model_loader: - kv  66:                                split.count u16              = 3
+0.00.305.572 I llama_model_loader: - type  f32:  557 tensors
+0.00.305.573 I llama_model_loader: - type q8_0:  248 tensors
+0.00.305.574 I llama_model_loader: - type q6_K:  250 tensors
+0.00.305.574 I llama_model_loader: - type iq4_nl:   49 tensors
+0.00.305.575 I llama_model_loader: - type iq3_s:    2 tensors
+0.00.305.575 I llama_model_loader: - type iq2_s:   94 tensors
+0.00.305.576 I llama_model_loader: - type bf16:   24 tensors
+0.00.305.578 I print_info: file format = GGUF V3 (latest)
+0.00.305.580 I print_info: file type   = IQ3_XXS - 3.0625 bpw
+0.00.305.584 I print_info: file size   = 76.32 GiB (3.71 BPW) 
+0.00.305.947 I llama_prepare_model_devices: using device Vulkan0 (Intel(R) Arc(tm) B580 Graphics (BMG G21)) (0000:03:00.0) - 10965 MiB free
+0.00.611.105 I load: 0 unused tokens
+0.00.680.441 I load: printing all EOG tokens:
+0.00.680.448 I load:   - 248044 ('<|endoftext|>')
+0.00.680.449 I load:   - 248046 ('<|im_end|>')
+0.00.680.450 I load:   - 248063 ('<|fim_pad|>')
+0.00.680.450 I load:   - 248064 ('<|repo_name|>')
+0.00.680.450 I load:   - 248065 ('<|file_sep|>')
+0.00.681.551 I load: special tokens cache size = 33
+0.00.813.094 I load: token to piece cache size = 1.7581 MB
+0.00.813.125 I print_info: arch                  = qwen4exp
+0.00.813.126 I print_info: vocab_only            = 0
+0.00.813.126 I print_info: no_alloc              = 0
+0.00.813.126 I print_info: n_ctx_train           = 262144
+0.00.813.128 I print_info: n_embd_inp            = 2560
+0.00.813.128 I print_info: n_embd                = 2560
+0.00.813.130 I print_info: n_embd_out            = 10240
+0.00.813.130 I print_info: n_layer               = 48
+0.00.813.131 I print_info: n_layer_all           = 48
+0.00.813.141 I print_info: n_head                = 24
+0.00.813.144 I print_info: n_head_kv             = 2
+0.00.813.144 I print_info: n_rot                 = 64
+0.00.813.145 I print_info: n_swa                 = 0
+0.00.813.146 I print_info: is_swa_any            = 0
+0.00.813.147 I print_info: n_embd_head_k         = 256
+0.00.813.147 I print_info: n_embd_head_v         = 256
+0.00.813.149 I print_info: n_gqa                 = 12
+0.00.813.154 I print_info: n_embd_k_gqa          = 512
+0.00.813.157 I print_info: n_embd_v_gqa          = 512
+0.00.813.159 I print_info: f_norm_eps            = 0.0e+00
+0.00.813.161 I print_info: f_norm_rms_eps        = 1.0e-06
+0.00.813.161 I print_info: f_clamp_kqv           = 0.0e+00
+0.00.813.161 I print_info: f_max_alibi_bias      = 0.0e+00
+0.00.813.162 I print_info: f_logit_scale         = 0.0e+00
+0.00.813.162 I print_info: f_attn_scale          = 0.0e+00
+0.00.813.163 I print_info: f_attn_value_scale    = 0.0000
+0.00.813.165 I print_info: n_ff                  = 0
+0.00.813.165 I print_info: n_expert              = 512
+0.00.813.166 I print_info: n_expert_used         = 10
+0.00.813.166 I print_info: n_expert_groups       = 0
+0.00.813.166 I print_info: n_group_used          = 0
+0.00.813.167 I print_info: causal attn           = 1
+0.00.813.167 I print_info: pooling type          = -1
+0.00.813.167 I print_info: rope type             = 40
+0.00.813.168 I print_info: rope scaling          = linear
+0.00.813.169 I print_info: freq_base_train       = 10000000.0
+0.00.813.170 I print_info: freq_scale_train      = 1
+0.00.813.170 I print_info: n_ctx_orig_yarn       = 262144
+0.00.813.171 I print_info: rope_yarn_log_mul     = 0.0000
+0.00.813.171 I print_info: rope_finetuned        = unknown
+0.00.813.171 I print_info: mrope sections        = [11, 11, 10, 0]
+0.00.813.172 I print_info: model type            = A3B
+0.00.813.174 I print_info: model params          = 176.94 B
+0.00.813.174 I print_info: general.name          = Qwen3.8 Flash Next
+0.00.813.178 I print_info: vocab type            = BPE
+0.00.813.179 I print_info: n_vocab               = 248320
+0.00.813.179 I print_info: n_merges              = 247587
+0.00.813.180 I print_info: BOS token             = 248044 '<|endoftext|>'
+0.00.813.180 I print_info: EOS token             = 248046 '<|im_end|>'
+0.00.813.180 I print_info: EOT token             = 248046 '<|im_end|>'
+0.00.813.181 I print_info: PAD token             = 248044 '<|endoftext|>'
+0.00.813.181 I print_info: LF token              = 198 'Ċ'
+0.00.813.182 I print_info: FIM PRE token         = 248060 '<|fim_prefix|>'
+0.00.813.182 I print_info: FIM SUF token         = 248062 '<|fim_suffix|>'
+0.00.813.182 I print_info: FIM MID token         = 248061 '<|fim_middle|>'
+0.00.813.183 I print_info: FIM PAD token         = 248063 '<|fim_pad|>'
+0.00.813.183 I print_info: FIM REP token         = 248064 '<|repo_name|>'
+0.00.813.183 I print_info: FIM SEP token         = 248065 '<|file_sep|>'
+0.00.813.184 I print_info: EOG token             = 248044 '<|endoftext|>'
+0.00.813.185 I print_info: EOG token             = 248046 '<|im_end|>'
+0.00.813.185 I print_info: EOG token             = 248063 '<|fim_pad|>'
+0.00.813.185 I print_info: EOG token             = 248064 '<|repo_name|>'
+0.00.813.186 I print_info: EOG token             = 248065 '<|file_sep|>'
+0.00.813.186 I print_info: max token length      = 256
+0.00.813.189 I load_tensors: loading model tensors, this can take a while... (load_mode = mmap)
+0.00.825.209 I add: tensor per_layer_token_embd.weight (size = 27465 MiB) lazy read enabled
+0.00.835.644 W llama_model_loader: tensor overrides to CPU are used with mmap enabled - consider using --load-mode none for better performance
+0.24.848.780 I load_tensors: offloading output layer to GPU
+0.24.848.782 I load_tensors: offloading 47 repeating layers to GPU
+0.24.848.783 I load_tensors: offloaded 49/49 layers to GPU
+0.24.848.791 I load_tensors:   CPU_Mapped model buffer size = 19240.51 MiB
+0.24.848.792 I load_tensors:   CPU_Mapped model buffer size = 30864.67 MiB
+0.24.848.793 I load_tensors:      Vulkan0 model buffer size =  3816.11 MiB
+0.24.848.794 I load_tensors:   CPU_Mapped model buffer size = 27465.95 MiB
+0.36.224.077 I init_moe_expert_cache: expert cache: 48 layers x 48 slots, 4347.66 MiB uploaded to Vulkan0
+0.36.232.115 I cmn  common_init_: added <|endoftext|> logit bias = -inf
+0.36.232.121 I cmn  common_init_: added <|im_end|> logit bias = -inf
+0.36.232.122 I cmn  common_init_: added <|fim_pad|> logit bias = -inf
+0.36.232.122 I cmn  common_init_: added <|repo_name|> logit bias = -inf
+0.36.232.123 I cmn  common_init_: added <|file_sep|> logit bias = -inf
+0.36.232.208 I llama_context: constructing llama_context
+0.36.232.213 I llama_context: n_seq_max             = 1
+0.36.232.213 I llama_context: n_ctx                 = 16384
+0.36.232.214 I llama_context: n_ctx_seq             = 16384
+0.36.232.214 I llama_context: n_batch               = 2048
+0.36.232.214 I llama_context: n_ubatch              = 2048
+0.36.232.215 I llama_context: causal_attn           = 1
+0.36.232.216 I llama_context: flash_attn            = enabled
+0.36.232.216 I llama_context: kv_unified            = false
+0.36.232.219 I llama_context: freq_base             = 10000000.0
+0.36.232.220 I llama_context: freq_scale            = 1
+0.36.232.220 I llama_context: n_rs_seq              = 0
+0.36.232.220 I llama_context: n_outputs_max         = 1
+0.36.232.221 I llama_context: n_outputs_max_per_seq = 1
+0.36.232.221 I llama_context: n_ctx_seq (16384) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.36.232.688 I llama_context: Vulkan_Host  output buffer size =     0.95 MiB
+0.36.235.919 I llama_kv_cache:    Vulkan0 KV buffer size =   204.00 MiB
+0.36.246.953 I llama_kv_cache: size =  204.00 MiB ( 16384 cells,  12 layers,  1/1 seqs), K (q8_0):  102.00 MiB, V (q8_0):  102.00 MiB
+0.36.246.959 I llama_kv_cache: attn_rot_k = 1, n_embd_head_k_all = 256
+0.36.246.960 I llama_kv_cache: attn_rot_v = 1, n_embd_head_k_all = 256
+0.36.249.636 I llama_memory_recurrent:    Vulkan0 RS buffer size =   112.57 MiB
+0.36.249.653 I llama_memory_recurrent: size =  112.57 MiB (     1 cells,  48 layers,  1 seqs  0 rs_seq), R (f32):    4.22 MiB, S (f32):  108.00 MiB, P (f32):    0.35 MiB
+0.36.249.658 I operator(): creating indexer KV cache, size = 16384 cells
+0.36.251.102 I llama_kv_cache:    Vulkan0 KV buffer size =    76.50 MiB
+0.36.251.613 I llama_kv_cache: size =   76.50 MiB ( 16384 cells,  12 layers,  1/1 seqs), K (q8_0):   25.50 MiB, V (q8_0):   51.00 MiB
+0.36.251.616 I llama_kv_cache: attn_rot_k = 1, n_embd_head_k_all = 128
+0.36.251.617 I llama_kv_cache: attn_rot_v = 1, n_embd_head_k_all = 256
+0.36.251.665 I sched_reserve: reserving ...
+0.36.262.464 I resolve_fused_ops: resolving fused DeepSeek V4 HC support:
+0.36.268.256 I resolve_fused_ops: fused DeepSeek V4 HC pre enabled
+0.36.274.045 I resolve_fused_ops: fused DeepSeek V4 HC comb enabled
+0.36.279.566 I resolve_fused_ops: fused DeepSeek V4 HC post enabled
+0.36.346.111 I sched_reserve:    Vulkan0 compute buffer size =  1495.05 MiB
+0.36.346.120 I sched_reserve: Vulkan_Host compute buffer size =   156.67 MiB
+0.36.346.121 I sched_reserve: graph nodes  = 8574
+0.36.346.122 I sched_reserve: graph splits = 145 (with bs=2048), 98 (with bs=1)
+0.36.346.126 I sched_reserve: reserve took 94.46 ms, sched copies = 1
+0.36.346.228 I cmn          init: llama threadpool init, n_threads = 6
+0.36.346.266 I cmn  common_init_: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+[sched timing] graph 8894 nodes, 98 splits: wall 2.144 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.032 s | compute: Vulkan0 0.253 s CPU 1.859 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+0.38.506.785 W srv    load_model: cache_reuse is not supported by this context, it will be disabled
+[sched timing] graph 8894 nodes, 98 splits: wall 1.570 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.017 s | compute: Vulkan0 0.190 s CPU 1.363 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+0.40.079.602 I cmn  common_conte: the context does not support partial sequence removal
+0.40.082.473 I srv    load_model: speculative decoding will use checkpoints
+0.40.082.478 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 16384, kv_unified = 'false'
+0.40.082.491 I spec common_specu: no implementations specified for speculative decoding
+0.40.082.500 I slot   load_model: id  0 | task -1 | new slot, n_ctx = 16384
+0.40.082.562 I srv    load_model: prompt cache is enabled, size limit: 8192 MiB
+0.40.082.564 I srv    load_model: use `--cache-ram 0` to disable the prompt cache
+0.40.082.564 I srv    load_model: for more info see https://github.com/ggml-org/llama.cpp/pull/16391
+0.40.082.565 I srv    load_model: context checkpoints enabled, max = 32, min spacing = 8192
+0.40.082.582 I srv          init: idle slots will be saved to prompt cache upon starting a new task
+0.40.094.199 I srv          init: init: chat template, example_format: '<|im_start|>system
+Reasoning effort is set to xhigh. Please think carefully through the task, validate key assumptions, consider plausible alternatives, and prioritize correctness, consistency, and clarity in the final answer.
+
+You are a helpful assistant<|im_end|>
+<|im_start|>user
+Hello<|im_end|>
+<|im_start|>assistant
+<think>
+
+</think>
+
+Hi there<|im_end|>
+<|im_start|>user
+How are you?<|im_end|>
+<|im_start|>assistant
+<think>
+'
+0.40.095.765 I srv          init: init: chat template, thinking = 1
+0.40.095.776 I srv          init: preserve_reasoning kwarg: true
+0.40.095.776 W srv          init: chat template supports preserving reasoning, it is enabled by default (may use more tokens, disable via --no-reasoning-preserve)
+0.40.095.812 I srv  llama_server: model loaded
+0.40.095.820 I srv  llama_server: listening on http://127.0.0.1:8089
+0.40.095.884 I srv  update_slots: all slots are idle
+0.40.295.984 I srv  server_strea: conv_id= (empty=1)
+0.40.306.455 I slot get_availabl: id  0 | task -1 |  - skipping, slot is empty
+0.40.306.459 I slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = -1
+0.40.306.459 I srv  get_availabl: updating prompt cache
+0.40.306.464 I srv          load:  - looking for better prompt, base f_keep = -1.000, f_sim = 0.000
+0.40.306.469 I srv        update:  - cache state: 0 prompts, 0.000 MiB (limits: 8192.000 MiB, 16384 tokens, 8589934592 est)
+0.40.306.470 I srv  get_availabl: prompt cache update took 0.01 ms
+0.40.306.506 I slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> min-p -> ?xtc -> temp-ext -> dist 
+0.40.306.517 I slot launch_slot_: id  0 | task -1 | sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+	top_k = 20, top_p = 0.950, min_p = 0.050, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+0.40.306.519 I slot launch_slot_: id  0 | task 0 | processing task, is_child = 0
+0.40.306.530 I slot   operator(): id  0 | task 0 | new prompt, n_ctx_slot = 16384, n_keep = 0, task.n_tokens = 4759
+0.40.306.532 I slot   operator(): id  0 | task 0 | cached n_tokens = 0, memory_seq_rm [0, end)
+[sched timing] graph 8894 nodes, 145 splits: wall 10.939 s | copies 4.140 s (1422 MiB) | expert scan 0.011 s | other host 0.009 s | compute: Vulkan0 3.286 s CPU 3.493 s | routing: 47 ids tensors, cold rows 902626 of 962560, used cold experts 753
+0.51.272.534 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =   2048, progress = 0.43, t =  10.97 s / 186.76 tokens per second
+0.51.272.537 I slot   operator(): id  0 | task 0 | cached n_tokens = 2048, memory_seq_rm [2048, end)
+[sched timing] graph 8894 nodes, 145 splits: wall 3.376 s | copies 0.651 s (989 MiB) | expert scan 0.009 s | other host 0.005 s | compute: Vulkan0 1.583 s CPU 1.128 s | routing: 47 ids tensors, cold rows 292190 of 311610, used cold experts 523
+0.54.658.788 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =   2711, progress = 0.57, t =  14.35 s / 188.89 tokens per second
+0.54.658.790 I slot   operator(): id  0 | task 0 | cached n_tokens = 2711, memory_seq_rm [2711, end)
+0.54.705.764 I slot create_check: id  0 | task 0 | created context checkpoint 1 of 32 (pos_min = 2710, pos_max = 2710, n_tokens = 2711, size = 112.571 MiB)
+[sched timing] graph 8894 nodes, 145 splits: wall 7.200 s | copies 0.845 s (1016 MiB) | expert scan 0.021 s | other host 0.012 s | compute: Vulkan0 3.659 s CPU 2.662 s | routing: 47 ids tensors, cold rows 901055 of 960680, used cold experts 537
+1.01.931.613 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =   4755, progress = 1.00, t =  21.63 s / 219.88 tokens per second
+1.01.931.615 I slot   operator(): id  0 | task 0 | cached n_tokens = 4755, memory_seq_rm [4755, end)
+1.01.932.135 I slot init_sampler: id  0 | task 0 | init sampler, took 0.48 ms, tokens: text = 4759, total = 4759
+1.01.980.803 I slot create_check: id  0 | task 0 | created context checkpoint 2 of 32 (pos_min = 4754, pos_max = 4754, n_tokens = 4755, size = 112.571 MiB)
+[sched timing] graph 8894 nodes, 98 splits: wall 0.242 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.008 s | compute: Vulkan0 0.144 s CPU 0.090 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.135 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.070 s CPU 0.058 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.102 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.035 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.102 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.035 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.100 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.100 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.099 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.100 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.100 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.100 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.100 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.100 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.061 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.100 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.100 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.101 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.101 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.100 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.101 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.101 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.101 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.034 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.100 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.100 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.100 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.100 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.100 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.100 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.100 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.061 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.101 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.062 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.102 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.062 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.101 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.062 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.101 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.006 s | compute: Vulkan0 0.062 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.104 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.064 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.103 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.064 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.103 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.064 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.104 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.065 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.107 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.068 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.107 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.068 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.107 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.068 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.109 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.071 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.111 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.072 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.111 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.072 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.111 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.072 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.116 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.077 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.116 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.077 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.116 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.077 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.118 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.079 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.120 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.081 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.120 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.081 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.122 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.083 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.126 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.087 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.126 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.087 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.127 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.087 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.130 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.090 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.130 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.090 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.131 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.007 s | compute: Vulkan0 0.092 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.138 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.008 s | compute: Vulkan0 0.098 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.138 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.008 s | compute: Vulkan0 0.098 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.140 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.008 s | compute: Vulkan0 0.100 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.145 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.008 s | compute: Vulkan0 0.104 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.145 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.008 s | compute: Vulkan0 0.104 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.148 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.008 s | compute: Vulkan0 0.107 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.151 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.008 s | compute: Vulkan0 0.110 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.151 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.008 s | compute: Vulkan0 0.110 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.153 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.008 s | compute: Vulkan0 0.113 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+1.09.437.322 I slot print_timing: id  0 | task 0 | prompt eval time =   21924.40 ms /  4759 tokens (    4.61 ms per token,   217.06 tokens per second)
+1.09.437.326 I slot print_timing: id  0 | task 0 |        eval time =    7206.38 ms /    64 tokens (  114.39 ms per token,     8.74 tokens per second)
+1.09.437.327 I slot print_timing: id  0 | task 0 |       total time =   29130.78 ms /  4823 tokens
+1.09.437.331 I slot print_timing: id  0 | task 0 |    graphs reused =         63
+1.09.437.547 I slot      release: id  0 | task 0 | stop processing: n_tokens = 4822, truncated = 0
+1.09.437.556 I srv  update_slots: all slots are idle
+1.09.482.047 I srv  server_strea: conv_id= (empty=1)
+1.09.488.907 I slot get_availabl: id  0 | task -1 |  - checking sim = 1.000 (4759/4759) > 0.100
+1.09.488.910 I slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 1.000 (> 0.100 thold), f_keep = 0.987
+1.09.488.955 I slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> min-p -> ?xtc -> temp-ext -> dist 
+1.09.488.960 I slot launch_slot_: id  0 | task -1 | sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+	top_k = 20, top_p = 0.950, min_p = 0.050, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+1.09.488.961 I slot launch_slot_: id  0 | task 68 | processing task, is_child = 0
+1.09.488.965 I slot   operator(): id  0 | task 68 | new prompt, n_ctx_slot = 16384, n_keep = 0, task.n_tokens = 4759
+1.09.488.968 I slot   operator(): id  0 | task 68 | erased invalidated context checkpoint (pos_min = 2710, pos_max = 2710, n_tokens = 2711, n_swa = 0, pos_next = 0, size = 112.571 MiB)
+1.09.489.370 I slot   operator(): id  0 | task 68 | erased invalidated context checkpoint (pos_min = 4754, pos_max = 4754, n_tokens = 4755, n_swa = 0, pos_next = 0, size = 112.571 MiB)
+1.09.489.710 I slot   operator(): id  0 | task 68 | cached n_tokens = 0, memory_seq_rm [0, end)
+[sched timing] graph 8894 nodes, 145 splits: wall 8.060 s | copies 1.690 s (1422 MiB) | expert scan 0.013 s | other host 0.011 s | compute: Vulkan0 3.346 s CPU 2.999 s | routing: 47 ids tensors, cold rows 902626 of 962560, used cold experts 753
+1.17.581.558 I slot print_timing: id  0 | task 68 | prompt processing, n_tokens =   2048, progress = 0.43, t =   8.09 s / 253.07 tokens per second
+1.17.581.564 I slot   operator(): id  0 | task 68 | cached n_tokens = 2048, memory_seq_rm [2048, end)
+[sched timing] graph 8894 nodes, 145 splits: wall 3.663 s | copies 0.944 s (989 MiB) | expert scan 0.012 s | other host 0.009 s | compute: Vulkan0 1.672 s CPU 1.025 s | routing: 47 ids tensors, cold rows 292190 of 311610, used cold experts 523
+1.21.281.728 I slot print_timing: id  0 | task 68 | prompt processing, n_tokens =   2711, progress = 0.57, t =  11.79 s / 229.89 tokens per second
+1.21.281.735 I slot   operator(): id  0 | task 68 | cached n_tokens = 2711, memory_seq_rm [2711, end)
+1.21.364.255 I slot create_check: id  0 | task 68 | created context checkpoint 1 of 32 (pos_min = 2710, pos_max = 2710, n_tokens = 2711, size = 112.571 MiB)
+[sched timing] graph 8894 nodes, 145 splits: wall 7.464 s | copies 1.077 s (1016 MiB) | expert scan 0.018 s | other host 0.015 s | compute: Vulkan0 3.845 s CPU 2.509 s | routing: 47 ids tensors, cold rows 901055 of 960680, used cold experts 537
+1.28.875.803 I slot print_timing: id  0 | task 68 | prompt processing, n_tokens =   4755, progress = 1.00, t =  19.39 s / 245.27 tokens per second
+1.28.875.810 I slot   operator(): id  0 | task 68 | cached n_tokens = 4755, memory_seq_rm [4755, end)
+1.28.876.492 I slot init_sampler: id  0 | task 68 | init sampler, took 0.63 ms, tokens: text = 4759, total = 4759
+1.28.946.769 I slot create_check: id  0 | task 68 | created context checkpoint 2 of 32 (pos_min = 4754, pos_max = 4754, n_tokens = 4755, size = 112.571 MiB)
+[sched timing] graph 8894 nodes, 98 splits: wall 0.998 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.026 s | compute: Vulkan0 0.243 s CPU 0.729 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.874 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.030 s | compute: Vulkan0 0.172 s CPU 0.671 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.957 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.022 s | compute: Vulkan0 0.149 s CPU 0.786 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.860 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.021 s | compute: Vulkan0 0.153 s CPU 0.687 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.063 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.021 s | compute: Vulkan0 0.156 s CPU 0.886 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.132 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.030 s | compute: Vulkan0 0.144 s CPU 0.959 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.163 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.025 s | compute: Vulkan0 0.147 s CPU 0.991 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.147 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.022 s | compute: Vulkan0 0.143 s CPU 0.981 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.111 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.026 s | compute: Vulkan0 0.139 s CPU 0.945 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.859 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.027 s | compute: Vulkan0 0.168 s CPU 0.664 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.051 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.023 s | compute: Vulkan0 0.151 s CPU 0.877 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.719 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.022 s | compute: Vulkan0 0.150 s CPU 0.546 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.854 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.026 s | compute: Vulkan0 0.151 s CPU 0.676 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.909 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.029 s | compute: Vulkan0 0.133 s CPU 0.748 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.177 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.013 s | compute: Vulkan0 0.126 s CPU 0.037 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.167 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.009 s | compute: Vulkan0 0.122 s CPU 0.035 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.164 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.009 s | compute: Vulkan0 0.121 s CPU 0.034 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.162 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.009 s | compute: Vulkan0 0.121 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.757 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.028 s | compute: Vulkan0 0.154 s CPU 0.575 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.751 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.027 s | compute: Vulkan0 0.160 s CPU 0.564 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.930 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.025 s | compute: Vulkan0 0.152 s CPU 0.753 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.182 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.030 s | compute: Vulkan0 0.150 s CPU 1.003 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.155 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.028 s | compute: Vulkan0 0.150 s CPU 0.978 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.137 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.030 s | compute: Vulkan0 0.144 s CPU 0.963 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.115 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.034 s | compute: Vulkan0 0.153 s CPU 0.927 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.111 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.035 s | compute: Vulkan0 0.147 s CPU 0.930 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.098 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.036 s | compute: Vulkan0 0.150 s CPU 0.912 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.117 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.032 s | compute: Vulkan0 0.141 s CPU 0.944 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.029 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.032 s | compute: Vulkan0 0.145 s CPU 0.852 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.062 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.038 s | compute: Vulkan0 0.137 s CPU 0.886 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.039 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.023 s | compute: Vulkan0 0.148 s CPU 0.868 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.041 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.030 s | compute: Vulkan0 0.142 s CPU 0.868 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.039 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.026 s | compute: Vulkan0 0.144 s CPU 0.870 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.014 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.024 s | compute: Vulkan0 0.147 s CPU 0.843 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.015 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.029 s | compute: Vulkan0 0.142 s CPU 0.844 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.038 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.030 s | compute: Vulkan0 0.150 s CPU 0.858 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.136 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.025 s | compute: Vulkan0 0.150 s CPU 0.962 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.104 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.034 s | compute: Vulkan0 0.163 s CPU 0.907 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.025 s | compute: Vulkan0 0.153 s CPU 0.891 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.146 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.029 s | compute: Vulkan0 0.154 s CPU 0.962 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.096 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.023 s | compute: Vulkan0 0.143 s CPU 0.930 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.050 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.022 s | compute: Vulkan0 0.138 s CPU 0.890 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.859 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.025 s | compute: Vulkan0 0.148 s CPU 0.686 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.868 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.027 s | compute: Vulkan0 0.150 s CPU 0.692 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.923 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.034 s | compute: Vulkan0 0.166 s CPU 0.723 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.628 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.024 s | compute: Vulkan0 0.150 s CPU 0.454 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.823 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.026 s | compute: Vulkan0 0.153 s CPU 0.643 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.990 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.027 s | compute: Vulkan0 0.147 s CPU 0.816 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.029 s | compute: Vulkan0 0.161 s CPU 0.876 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.960 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.029 s | compute: Vulkan0 0.144 s CPU 0.788 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.646 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.029 s | compute: Vulkan0 0.149 s CPU 0.467 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.179 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.011 s | compute: Vulkan0 0.126 s CPU 0.041 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.169 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.010 s | compute: Vulkan0 0.122 s CPU 0.037 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.171 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.011 s | compute: Vulkan0 0.123 s CPU 0.036 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.172 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.011 s | compute: Vulkan0 0.123 s CPU 0.038 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.167 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.009 s | compute: Vulkan0 0.122 s CPU 0.036 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.165 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.009 s | compute: Vulkan0 0.120 s CPU 0.035 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.165 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.009 s | compute: Vulkan0 0.120 s CPU 0.035 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.165 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.009 s | compute: Vulkan0 0.121 s CPU 0.035 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.164 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.009 s | compute: Vulkan0 0.121 s CPU 0.034 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.161 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.008 s | compute: Vulkan0 0.120 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.161 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.008 s | compute: Vulkan0 0.120 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.162 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.008 s | compute: Vulkan0 0.120 s CPU 0.033 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.161 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.009 s | compute: Vulkan0 0.120 s CPU 0.032 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+2.18.660.554 I slot print_timing: id  0 | task 68 | prompt eval time =   20483.42 ms /  4759 tokens (    4.30 ms per token,   232.33 tokens per second)
+2.18.660.558 I slot print_timing: id  0 | task 68 |        eval time =   48688.16 ms /    64 tokens (  772.83 ms per token,     1.29 tokens per second)
+2.18.660.559 I slot print_timing: id  0 | task 68 |       total time =   69171.58 ms /  4823 tokens
+2.18.660.560 I slot print_timing: id  0 | task 68 |    graphs reused =        125
+2.18.660.760 I slot      release: id  0 | task 68 | stop processing: n_tokens = 4822, truncated = 0
+2.18.660.768 I srv  update_slots: all slots are idle
+2.18.709.591 I srv  server_strea: conv_id= (empty=1)
+2.18.709.791 I slot get_availabl: id  0 | task -1 |  - checking sim = 0.000 (0/32) > 0.100
+2.18.709.806 I slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 76416174277
+2.18.709.806 I srv  get_availabl: updating prompt cache
+2.18.710.082 I srv   prompt_save:  - saving prompt with length 4822, total state size = 195.347 MiB (draft: 0.000 MiB)
+2.18.841.914 I srv          load:  - looking for better prompt, base f_keep = 0.000, f_sim = 0.000
+2.18.841.919 I srv          load:    - prompt with length    4822, lcp =       0, f_keep = 0.000, f_sim = 0.000
+2.18.841.922 I srv        update:  - cache state: 1 prompts, 420.489 MiB (limits: 8192.000 MiB, 16384 tokens, 93942 est)
+2.18.841.923 I srv        update:    - prompt 0x556a57e253e0:    4822 tokens, checkpoints:  2,   420.489 MiB
+2.18.841.924 I srv  get_availabl: prompt cache update took 132.12 ms
+2.18.841.945 I slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> min-p -> ?xtc -> temp-ext -> dist 
+2.18.841.950 I slot launch_slot_: id  0 | task -1 | sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+	top_k = 20, top_p = 0.950, min_p = 0.050, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+2.18.841.951 I slot launch_slot_: id  0 | task 136 | processing task, is_child = 0
+2.18.841.958 I slot   operator(): id  0 | task 136 | new prompt, n_ctx_slot = 16384, n_keep = 0, task.n_tokens = 32
+2.18.841.959 I slot   operator(): id  0 | task 136 | erased invalidated context checkpoint (pos_min = 2710, pos_max = 2710, n_tokens = 2711, n_swa = 0, pos_next = 0, size = 112.571 MiB)
+2.18.842.328 I slot   operator(): id  0 | task 136 | erased invalidated context checkpoint (pos_min = 4754, pos_max = 4754, n_tokens = 4755, n_swa = 0, pos_next = 0, size = 112.571 MiB)
+2.18.842.668 I slot   operator(): id  0 | task 136 | cached n_tokens = 0, memory_seq_rm [0, end)
+[sched timing] graph 8894 nodes, 98 splits: wall 2.339 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.034 s | compute: Vulkan0 1.166 s CPU 1.139 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+2.21.188.036 I slot   operator(): id  0 | task 136 | cached n_tokens = 28, memory_seq_rm [28, end)
+2.21.188.086 I slot init_sampler: id  0 | task 136 | init sampler, took 0.01 ms, tokens: text = 32, total = 32
+2.21.249.949 I slot create_check: id  0 | task 136 | created context checkpoint 1 of 32 (pos_min = 27, pos_max = 27, n_tokens = 28, size = 112.571 MiB)
+[sched timing] graph 8894 nodes, 98 splits: wall 1.026 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.025 s | compute: Vulkan0 0.277 s CPU 0.724 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.662 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.035 s | compute: Vulkan0 0.131 s CPU 0.496 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.683 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.025 s | compute: Vulkan0 0.126 s CPU 0.532 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.649 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.021 s | compute: Vulkan0 0.142 s CPU 0.487 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.890 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.024 s | compute: Vulkan0 0.130 s CPU 0.736 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 0.431 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.023 s | compute: Vulkan0 0.139 s CPU 0.269 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+2.25.644.325 I slot print_timing: id  0 | task 136 | prompt eval time =    3447.67 ms /    32 tokens (  107.74 ms per token,     9.28 tokens per second)
+2.25.644.336 I slot print_timing: id  0 | task 136 |        eval time =    3352.83 ms /     6 tokens (  670.57 ms per token,     1.49 tokens per second)
+2.25.644.337 I slot print_timing: id  0 | task 136 |       total time =    6800.50 ms /    38 tokens
+2.25.644.338 I slot print_timing: id  0 | task 136 |    graphs reused =        129
+2.25.644.359 I slot      release: id  0 | task 136 | stop processing: n_tokens = 37, truncated = 0
+2.25.644.369 I srv  update_slots: all slots are idle
+2.25.722.858 I srv    operator(): operator(): cleaning up before exit...
+2.25.723.855 I common_memory_breakdown_print: | memory breakdown [MiB]                                 | total   free     self   model   context   compute    unaccounted |
+2.25.723.858 I common_memory_breakdown_print: |   - Vulkan0 (Intel(R) Arc(tm) B580 Graphics (BMG G21)) | 12216 = 2031 + ( 9777 =  8163 +     393 +    1220) +         406 |
+2.25.723.859 I common_memory_breakdown_print: |   - Host                                               |                 77727 = 77571 +       0 +     156                |
+2.25.723.952 W ~llama_context:    Vulkan0 compute buffer size of 1220.7729 MiB, does not match expectation of 1495.0547 MiB

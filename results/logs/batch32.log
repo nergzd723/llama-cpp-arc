@@ -1,0 +1,67 @@
+== build exit 0 after 12s
+/tmp/claude-1000/-mnt-slopper/20cce305-b5f9-4087-9cbc-b56eede57845/scratchpad/batch32.sh: line 10: results/logs/build-sycl-prof2.log: No such file or directory
+== sycl-f4-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=0 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: 
+   up in 12s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 169 (with bs=2048), 122 (with bs=1)
+   VRAM: (12216 MiB, 1971 MiB free)
+sycl-f4-ub2048 prefill1: prompt 4759 tok in 92.8s = 51.3 tok/s | decode 64 tok @ 10.64 tok/s | disk read max 440450 KB/s, mean 212153 KB/s | GPU MHz mean 2558 max 2850
+sycl-f4-ub2048 prefill2: prompt 4759 tok in 26.4s = 180.4 tok/s | decode 64 tok @ 13.05 tok/s | disk read max 100326 KB/s, mean 20863 KB/s | GPU MHz mean 2494 max 2850
+sycl-f4-ub2048: generated '\n\n<think>\n\n</think>\n\nHere'
+  tok0: '\n\n'=0.9923  '\n'=0.0017  ''=0.0013  '\n\n\n'=0.0011
+  tok1: '<think>'=0.7130  'Below'=0.2210  'Here'=0.0419  '```'=0.0100
+  tok2: '\n\n'=0.9936  '\n'=0.0064  ' \n\n'=0.0000  '\n \n'=0.0000
+  tok3: '</think>'=1.0000  '*'=0.0000  '<think>'=0.0000  '*('=0.0000
+  tok4: '\n\n'=1.0000  ' a'=0.0000  '\n\n\n'=0.0000  ','=0.0000
+  tok5: 'Here'=0.8458  '```'=0.1127  '#'=0.0277  '###'=0.0026
+== sycl-f4-ub2048 done (147s)
+   probe argmax same at all positions: True | pos1: [('<think>', 0.713), ('Below', 0.221)]
+   continuation: '\n\nHere is the summary of the document in ten bullet points:\n\n*   **Project Goal:** The rep'
+== sycl-f4-timeline-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=0 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl-prof/bin extra: -ub 2048 env: GGML_SYCL_TIMELINE=/mnt/slopper/llama-cpp-arc/results/logs/timeline-f4-ub2048.txt 
+   up in 36s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 169 (with bs=2048), 122 (with bs=1)
+   VRAM: 
+sycl-f4-timeline-ub2048 prefill1: prompt 4759 tok in 176.0s = 27.0 tok/s | decode 64 tok @ 9.75 tok/s | disk read max 425954 KB/s, mean 140153 KB/s | GPU MHz mean 1784 max 2850
+sycl-f4-timeline-ub2048 prefill2: prompt 4759 tok in 29.4s = 161.6 tok/s | decode 64 tok @ 12.49 tok/s | disk read max 147610 KB/s, mean 25712 KB/s | GPU MHz mean 2350 max 2850
+== sycl-f4-timeline-ub2048 done (255s)
+== timeline analysis (last big graph of pass 2):
+graph 5121: 316 events, device span 0.118 s
+  DMA on prefetch queue    busy   0.083 s ( 70.3%) in 315 events
+  DMA on compute queue     busy   0.000 s (  0.0%) in 0 events
+  all DMA (engine)         busy   0.083 s ( 70.3%) in 315 events
+  compute splits           busy   0.062 s ( 52.3%) in 1 events
+  MoE splits               busy   0.000 s (  0.0%) in 0 events
+  bytes: prefetch queue 0.48 GB (5.73 GB/s while busy), compute queue 0.00 GB (0.00 GB/s while busy)
+  1 splits, 1 MoE splits; MoE compute total 0.062 s, mean 61.8 ms
+  DMA idle gaps: 314 gaps, total 0.035 s; largest: 34.1 ms, 0.1 ms, 0.0 ms, 0.0 ms, 0.0 ms, 0.0 ms, 0.0 ms, 0.0 ms
+  --- 120 ms window from the middle (ms relative):
+    cmp split    -7.90 ..    53.86      0.0 MB  161 nodes MUL_MAT_ID
+    pre dma      -0.14 ..     0.05      1.1 MB  
+    pre dma       0.05 ..     0.14      0.5 MB  
+    pre dma       0.15 ..     0.33      1.1 MB  
+    pre dma       0.33 ..     0.60      1.6 MB  
+    pre dma       0.60 ..     1.08      2.6 MB  
+    pre dma       1.08 ..     1.27      1.1 MB  
+    pre dma       1.27 ..     1.46      1.1 MB  
+    pre dma       1.46 ..     1.55      0.5 MB  
+    pre dma       1.57 ..     1.94      2.1 MB  
+    pre dma       1.95 ..     2.13      1.1 MB  
+    pre dma       2.13 ..     2.23      0.5 MB  
+    pre dma       2.23 ..     2.50      1.6 MB  
+    pre dma       2.51 ..     2.69      1.1 MB  
+    pre dma       2.69 ..     2.79      0.5 MB  
+    pre dma       2.79 ..     2.88      0.5 MB  
+    pre dma       2.89 ..     3.07      1.1 MB  
+    pre dma       3.08 ..     3.44      2.1 MB  
+    pre dma       3.45 ..     3.82      2.1 MB  
+    pre dma       3.84 ..     4.11      1.6 MB  
+    pre dma       4.12 ..     4.30      1.1 MB  
+    pre dma       4.31 ..     4.68      2.1 MB  
+    pre dma       4.68 ..     5.04      2.1 MB  
+    pre dma       5.05 ..     5.14      0.5 MB  
+    pre dma       5.14 ..     5.50      2.1 MB  
+    pre dma       5.50 ..     5.78      1.6 MB  
+    pre dma       5.78 ..     5.96      1.1 MB  
+    pre dma       5.96 ..     6.24      1.6 MB  
+    pre dma       6.24 ..     6.60      2.1 MB  
+    pre dma       6.60 ..     6.88      1.6 MB  
+BATCH32 DONE

@@ -1,0 +1,30 @@
+
+
+<think>
+
+</think>
+
+Here is a robust bash script that recursively finds `.jpeg` files, renames them to `.jpg`, and skips the operation if the target file already exists.
+
+### The Script: `rename_jpeg_to_jpg.sh`
+
+```bash
+#!/bin/bash
+
+# 1. Enable nullglob so that if no files match, the glob expands to nothing (prevents errors)
+shopt -s nullglob
+
+# 2. Enable globstar so that ** matches all files and directories recursively
+shopt -s globstar
+
+# 3. Loop through all files ending in .jpeg in the current directory and subdirectories
+for file in **/*.jpeg; do
+    # 4. Check if the current item is a regular file (skip directories or symlinks if needed)
+    if [[ -f "$file" ]]; then
+        # 5. Construct the new filename by replacing .jpeg with .jpg
+        new_file="${file%.jpeg}.jpg"
+
+        # 6. Check if the target file already exists
+        if [[ -e "$new_file" ]]; then
+            # 7. If it exists, print a warning and skip renaming
+            echo "Skipping: '$file

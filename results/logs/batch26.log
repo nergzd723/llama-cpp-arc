@@ -1,0 +1,25 @@
+== vulkan build exit 0 after 203s
+== vk-sched-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build/bin extra: -ub 2048 env: GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 64s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 1495.05 MiB | graph splits = 147 (with bs=2048), 194 (with bs=1)
+   VRAM: (12216 MiB, 1857 MiB free)
+vk-sched-ub2048 prefill1: prompt 4759 tok in 18.8s = 252.9 tok/s | decode 64 tok @ 11.50 tok/s | disk read max 97184 KB/s, mean 29932 KB/s | GPU MHz mean 2127 max 2850
+vk-sched-ub2048 prefill2: prompt 4759 tok in 11.4s = 416.1 tok/s | decode 64 tok @ 11.23 tok/s | disk read max 16930 KB/s, mean 3232 KB/s | GPU MHz mean 2406 max 2850
+vk-sched-ub2048: generated '//////'
+Traceback (most recent call last):
+  File "<stdin>", line 7, in <module>
+  File "<stdin>", line 7, in <genexpr>
+TypeError: must be real number, not NoneType
+== vk-sched-ub2048 done (109s)
+== vk-timing-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=0 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build/bin extra: -ub 2048 env: GGML_SCHED_TIMING=1 GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 6s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 1495.05 MiB | graph splits = 145 (with bs=2048), 98 (with bs=1)
+   VRAM: (12216 MiB, 1857 MiB free)
+vk-timing-ub2048 prefill1: prompt 4759 tok in 11.5s = 413.2 tok/s | decode 64 tok @ 7.61 tok/s | disk read max 24938 KB/s, mean 6447 KB/s | GPU MHz mean 2185 max 2850
+vk-timing-ub2048 prefill2: prompt 4759 tok in 11.5s = 415.5 tok/s | decode 64 tok @ 7.99 tok/s | disk read max 2134 KB/s, mean 237 KB/s | GPU MHz mean 2180 max 2850
+== vk-timing-ub2048 done (47s)
+== vulkan sched timing (pass 2 graphs):
+[sched timing] graph 8894 nodes, 145 splits: wall 4.413 s | copies 1.227 s (1422 MiB) | expert scan 0.009 s | other host 0.008 s | compute: Vulkan0 3.150 s CPU 0.019 s
+[sched timing] graph 8894 nodes, 145 splits: wall 2.154 s | copies 0.588 s (989 MiB) | expert scan 0.008 s | other host 0.005 s | compute: Vulkan0 1.546 s CPU 0.006 s
+[sched timing] graph 8894 nodes, 145 splits: wall 4.505 s | copies 0.811 s (1016 MiB) | expert scan 0.013 s | other host 0.012 s | compute: Vulkan0 3.651 s CPU 0.018 s
+BATCH26 DONE

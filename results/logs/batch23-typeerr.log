@@ -1,0 +1,30 @@
+== build exit 2 after 6s
+/mnt/slopper/llama-cpp-arc/llama.cpp/ggml/src/ggml-backend.cpp:1973:42: error: no matching function for call to 'ggml_bitset_get'
+/mnt/slopper/llama-cpp-arc/llama.cpp/ggml/src/ggml-backend.cpp:2069:42: error: no viable conversion from 'vector<ggml_bitset_t>' to 'vector<uint8_t>'
+/mnt/slopper/llama-cpp-arc/llama.cpp/ggml/src/ggml-backend.cpp:2078:60: error: no viable overloaded '='
+/mnt/slopper/llama-cpp-arc/llama.cpp/ggml/src/ggml-backend.cpp:2082:46: error: no matching function for call to 'ggml_bitset_get'
+/mnt/slopper/llama-cpp-arc/llama.cpp/ggml/src/ggml-backend.cpp:2090:34: error: no matching function for call to 'ggml_bitset_get'
+2 warnings and 5 errors generated.
+== sycl-prefetch-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=0 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: GGML_SCHED_TIMING=1 
+   up in 30s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 169 (with bs=2048), 122 (with bs=1)
+   VRAM: (12216 MiB, 1971 MiB free)
+sycl-prefetch-ub2048 run1: prompt 18 tok @ 6.0 tok/s   decode 256 tok @ 9.88 tok/s
+sycl-prefetch-ub2048 run2: prompt 18 tok @ 24.5 tok/s   decode 256 tok @ 15.01 tok/s
+sycl-prefetch-ub2048 prefill1: prompt 4759 tok in 80.6s = 59.0 tok/s | decode 64 tok @ 12.49 tok/s | disk read max 367804 KB/s, mean 128151 KB/s | GPU MHz mean 2448 max 2850
+sycl-prefetch-ub2048 prefill2: prompt 4759 tok in 28.9s = 164.5 tok/s | decode 64 tok @ 13.46 tok/s | disk read max 36370 KB/s, mean 7736 KB/s | GPU MHz mean 2179 max 2850
+sycl-prefetch-ub2048: generated '\n\n<think>\n\n</think>\n\nHere'
+  tok0: '\n\n'=0.9923  '\n'=0.0017  ''=0.0013  '\n\n\n'=0.0011
+  tok1: '<think>'=0.7130  'Below'=0.2210  'Here'=0.0419  '```'=0.0100
+  tok2: '\n\n'=0.9936  '\n'=0.0064  ' \n\n'=0.0000  '\n \n'=0.0000
+  tok3: '</think>'=1.0000  '*'=0.0000  '<think>'=0.0000  '*('=0.0000
+  tok4: '\n\n'=1.0000  ' a'=0.0000  '\n\n\n'=0.0000  ','=0.0000
+  tok5: 'Here'=0.8458  '```'=0.1127  '#'=0.0277  '###'=0.0026
+== sycl-prefetch-ub2048 done (200s)
+== sched timing (pass 2 graphs):
+[sched timing] graph 8942 nodes, 169 splits: wall 7.036 s | copies 2.793 s (0 MiB) | expert scan 0.006 s | other host 0.098 s | compute: SYCL0 3.266 s CPU 0.874 s
+[sched timing] graph 8942 nodes, 169 splits: wall 9.954 s | copies 3.564 s (0 MiB) | expert scan 0.009 s | other host 0.218 s | compute: SYCL0 5.342 s CPU 0.821 s
+[sched timing] graph 8942 nodes, 122 splits: wall 1.002 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.053 s | compute: SYCL0 0.163 s CPU 0.785 s
+   probe argmax same at all positions: True | pos1: [('<think>', 0.713), ('Below', 0.221)]
+   continuation: '\n\n<think>\nThe user wants two things:\n1. A ten-bullet-point summary of the document\n2. A li'
+== sycl-prefetch-staged-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=0 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: GGML_SYCL_STAGED_UPLOAD=1 

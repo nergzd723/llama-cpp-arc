@@ -1,0 +1,54 @@
+== build exit 0 after 27s
+== sycl-prefetch-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=0 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: GGML_SCHED_TIMING=1 
+   up in 18s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 169 (with bs=2048), 122 (with bs=1)
+   VRAM: (12216 MiB, 1971 MiB free)
+sycl-prefetch-ub2048 run1: prompt 18 tok @ 11.1 tok/s   decode 256 tok @ 12.10 tok/s
+sycl-prefetch-ub2048 run2: prompt 18 tok @ 20.6 tok/s   decode 256 tok @ 14.33 tok/s
+sycl-prefetch-ub2048 prefill1: prompt 4759 tok in 72.6s = 65.6 tok/s | decode 64 tok @ 9.90 tok/s | disk read max 360240 KB/s, mean 130790 KB/s | GPU MHz mean 2560 max 2850
+sycl-prefetch-ub2048 prefill2: prompt 4759 tok in 31.3s = 152.1 tok/s | decode 64 tok @ 12.67 tok/s | disk read max 48872 KB/s, mean 7629 KB/s | GPU MHz mean 2550 max 2850
+sycl-prefetch-ub2048: generated '\n\n<think>\n\n</think>\n\nHere'
+  tok0: '\n\n'=0.9923  '\n'=0.0017  ''=0.0013  '\n\n\n'=0.0011
+  tok1: '<think>'=0.7130  'Below'=0.2210  'Here'=0.0419  '```'=0.0100
+  tok2: '\n\n'=0.9936  '\n'=0.0064  ' \n\n'=0.0000  '\n \n'=0.0000
+  tok3: '</think>'=1.0000  '*'=0.0000  '<think>'=0.0000  '*('=0.0000
+  tok4: '\n\n'=1.0000  ' a'=0.0000  '\n\n\n'=0.0000  ','=0.0000
+  tok5: 'Here'=0.8458  '```'=0.1127  '#'=0.0277  '###'=0.0026
+== sycl-prefetch-ub2048 done (179s)
+== sched timing (pass 2 graphs):
+[sched timing] graph 8942 nodes, 169 splits: wall 7.719 s | copies 6.181 s (0 MiB) | expert scan 0.003 s | other host 0.043 s | compute: SYCL0 1.306 s CPU 0.185 s
+[sched timing] graph 8942 nodes, 169 splits: wall 10.628 s | copies 6.296 s (0 MiB) | expert scan 0.006 s | other host 0.165 s | compute: SYCL0 3.340 s CPU 0.821 s
+[sched timing] graph 8942 nodes, 122 splits: wall 1.087 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.054 s | compute: SYCL0 0.161 s CPU 0.871 s
+   probe argmax same at all positions: True | pos1: [('<think>', 0.713), ('Below', 0.221)]
+   continuation: '\n\n<think>\n\n</think>\n\nHere is the summary of the document in ten bullet points:\n\n*   The re'
+== sycl-prefetch-staged-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=0 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: GGML_SYCL_STAGED_UPLOAD=1 
+   up in 56s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 169 (with bs=2048), 122 (with bs=1)
+   VRAM: (12216 MiB, 1971 MiB free)
+sycl-prefetch-staged-ub2048 prefill1: prompt 4759 tok in 75.5s = 63.1 tok/s | decode 64 tok @ 10.06 tok/s | disk read max 355212 KB/s, mean 194208 KB/s | GPU MHz mean 2433 max 2850
+sycl-prefetch-staged-ub2048 prefill2: prompt 4759 tok in 31.0s = 153.7 tok/s | decode 64 tok @ 12.95 tok/s | disk read max 38226 KB/s, mean 8047 KB/s | GPU MHz mean 2533 max 2850
+== sycl-prefetch-staged-ub2048 done (177s)
+== sycl-prefetch-ub4096: SLOTS=48 THREADS=auto ASYNC_CPU=0 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -b 4096 -ub 4096 env: 
+   up in 38s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 2432.56 MiB | graph splits = 169 (with bs=4096), 122 (with bs=1)
+   VRAM: (12216 MiB, 1004 MiB free)
+sycl-prefetch-ub4096 prefill1: prompt 4759 tok in 330.2s = 14.4 tok/s | decode 64 tok @ 4.25 tok/s | disk read max 414122 KB/s, mean 97082 KB/s | GPU MHz mean 2735 max 2850
+Traceback (most recent call last):
+  File "<stdin>", line 3, in <module>
+  File "/usr/lib/python3.14/json/__init__.py", line 298, in load
+    return loads(fp.read(),
+        cls=cls, object_hook=object_hook,
+        parse_float=parse_float, parse_int=parse_int,
+        parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)
+  File "/usr/lib/python3.14/json/__init__.py", line 352, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/usr/lib/python3.14/json/decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/json/decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+/tmp/claude-1000/-mnt-slopper/20cce305-b5f9-4087-9cbc-b56eede57845/scratchpad/runcfg.sh: line 25: 926755 Killed                     LLAMA_ARG_LOG_VERBOSITY=4 nohup setsid scripts/serve.sh "$@" > results/logs/$TAG.log 2>&1
+== sycl-prefetch-ub4096 done (824s)
+BATCH23 DONE

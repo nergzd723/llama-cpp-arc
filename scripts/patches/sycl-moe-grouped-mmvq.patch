@@ -1,26 +1,849 @@
+diff --git a/ggml/src/ggml-backend-impl.h b/ggml/src/ggml-backend-impl.h
+index 56f0090..60e0da0 100644
+--- a/ggml/src/ggml-backend-impl.h
++++ b/ggml/src/ggml-backend-impl.h
+@@ -8,6 +8,12 @@
+ extern "C" {
+ #endif
+ 
++    // A host copy of a small tensor the scheduler has just read back (the MoE routing ids), valid
++    // while the split consuming it is being launched. A backend that needs those values on the
++    // host to launch its kernels can take them from here instead of synchronizing its queue for
++    // its own readback. Returns NULL when there is no copy of this tensor.
++    GGML_API const void * ggml_backend_sched_host_copy(const struct ggml_tensor * tensor, size_t * size);
++
+     #define GGML_BACKEND_API_VERSION 2
+ 
+     //
+diff --git a/ggml/src/ggml-backend.cpp b/ggml/src/ggml-backend.cpp
+index ee265bf..27e616b 100644
+--- a/ggml/src/ggml-backend.cpp
++++ b/ggml/src/ggml-backend.cpp
+@@ -788,11 +788,28 @@ struct ggml_backend_sched_split {
+     int inputs_capacity;
+     // graph view of this split
+     struct ggml_cgraph graph;
++    // expert prefetch issued ahead of this split (GGML_SCHED_PREFETCH_EXPERTS); slot -1 when none
++    int prefetch_slot;
++    bool prefetch_tried;
++    bool prefetch_from_history;
++    struct ggml_tensor * prefetch_input_cpy;
++    ggml_backend_buffer_t prefetch_saved_buffer;
++    void * prefetch_saved_data;
+ };
+ 
+ // async execution of CPU splits (GGML_SCHED_ASYNC_CPU): a persistent worker
+ // computes a CPU split while the main thread keeps launching later splits that
+ // do not depend on it, so an independent GPU split overlaps the CPU compute
++#include <unordered_map>
++struct ggml_sched_expert_history {
++    std::unordered_map<const ggml_tensor *, std::vector<ggml_bitset_t>> sets; // bitset per weight tensor
++    std::unordered_map<const ggml_tensor *, std::vector<ggml_bitset_t>> prev; // the batch before that
++    std::unordered_map<const ggml_tensor *, int64_t> n_rows; // routing rows (tokens x experts) of that batch
++    // GGML_SCHED_PREFETCH_HIST: last (default) = previous batch's set, and = intersection of the last
++    // two (fewer wasted bytes, more fixups), or = their union (fewer fixups, more wasted bytes)
++    int mode = 0;
++};
++
+ struct ggml_sched_cpu_async {
+     std::thread             worker;
+     std::mutex              mtx;
+@@ -916,16 +933,31 @@ struct ggml_backend_sched {
+     // they overlap compute, alternating between two staging slots
+     bool prefetch_experts;
+     ggml_backend_t prefetch_backend;
++    // the fixup copies (experts used now but not prefetched) go through a third instance with its
++    // own queue, so they never wait behind the next splits' prefetch chunks
++    ggml_backend_t fixup_backend;
++    ggml_backend_event_t fixup_ready[GGML_SCHED_MAX_PREFETCH_SLOTS];
+     int prefetch_n_slots;
+     ggml_backend_buffer_t prefetch_slots[GGML_SCHED_MAX_PREFETCH_SLOTS];
+     ggml_backend_event_t prefetch_ready[GGML_SCHED_MAX_PREFETCH_SLOTS];
+     ggml_backend_event_t prefetch_free[GGML_SCHED_MAX_PREFETCH_SLOTS];
+     bool prefetch_used[GGML_SCHED_MAX_PREFETCH_SLOTS];
++    std::vector<ggml_bitset_t> prefetch_slot_set[GGML_SCHED_MAX_PREFETCH_SLOTS]; // experts uploaded into each slot
++    bool prefetch_slot_inflight[GGML_SCHED_MAX_PREFETCH_SLOTS]; // issued, split not launched yet
++    int64_t prefetch_slot_last[GGML_SCHED_MAX_PREFETCH_SLOTS];  // issue sequence number of the last use
++    int64_t prefetch_seq;
+     int prefetch_cur;
++    int prefetch_inflight; // issued prefetches whose split has not been launched yet
++    bool prefetch_disable_pending; // disable requested while splits were in flight: free the slots at the next eval
++    int prefetch_ahead;    // GGML_SCHED_PREFETCH_AHEAD: MoE splits to run ahead of the launched one
+ 
+     // async CPU split execution (GGML_SCHED_ASYNC_CPU); NULL when disabled
+     struct ggml_sched_cpu_async * cpu_async;
+ 
++    // experts each host-resident MoE weight tensor used in its previous batched evaluation
++    // (GGML_SCHED_PREFETCH_EXPERTS): prefetched for the next one before the routing ids exist
++    struct ggml_sched_expert_history * expert_history;
++
+     int debug;
+ 
+     // used for debugging graph reallocations [GGML_SCHED_DEBUG_REALLOC]
+@@ -1404,6 +1436,8 @@ void ggml_backend_sched_split_graph(ggml_backend_sched_t sched, struct ggml_cgra
+         }
+         split->i_start = 0;
+         split->n_inputs = 0;
++        split->prefetch_slot = -1;
++        split->prefetch_tried = false;
+         int cur_backend_id = split->backend_id;
+         for (; i < graph->n_nodes; i++) {
+             struct ggml_tensor * node = graph->nodes[i];
+@@ -1464,6 +1498,8 @@ void ggml_backend_sched_split_graph(ggml_backend_sched_t sched, struct ggml_cgra
+                 split->backend_id = node_backend_id;
+                 split->i_start = i;
+                 split->n_inputs = 0;
++                split->prefetch_slot = -1;
++                split->prefetch_tried = false;
+                 cur_backend_id = node_backend_id;
+             }
+ 
+@@ -1748,10 +1784,19 @@ static bool ggml_backend_sched_alloc_splits(ggml_backend_sched_t sched) {
+ 
+ static void ggml_backend_sched_prefetch_disable(ggml_backend_sched_t sched, ggml_backend_t split_backend) {
+     sched->prefetch_experts = false;
++    if (sched->prefetch_inflight > 0) {
++        // splits already issued still point into the slots: free them at the start of the next eval
++        sched->prefetch_disable_pending = true;
++        return;
++    }
++    sched->prefetch_disable_pending = false;
+     if (sched->prefetch_backend) {
+         ggml_backend_synchronize(split_backend);
+         ggml_backend_synchronize(sched->prefetch_backend);
+     }
++    if (sched->fixup_backend) {
++        ggml_backend_synchronize(sched->fixup_backend);
++    }
+     for (int i = 0; i < sched->prefetch_n_slots; i++) {
+         ggml_backend_buffer_free(sched->prefetch_slots[i]);
+         sched->prefetch_slots[i] = NULL;
+@@ -1759,29 +1804,14 @@ static void ggml_backend_sched_prefetch_disable(ggml_backend_sched_t sched, ggml
+     }
+ }
+ 
+-// slots are sized once for the largest offloaded expert tensor in the current graph so
+-// that they never need to grow mid-eval
+-static size_t ggml_backend_sched_prefetch_max_size(ggml_backend_sched_t sched) {
+-    size_t max_size = 0;
+-    for (int split_id = 0; split_id < sched->n_splits; split_id++) {
+-        struct ggml_backend_sched_split * split = &sched->splits[split_id];
+-        if (split->graph.n_nodes == 0 || split->graph.nodes[0]->op != GGML_OP_MUL_MAT_ID) {
+-            continue;
+-        }
+-        for (int input_id = 0; input_id < split->n_inputs; input_id++) {
+-            const ggml_tensor * input = split->inputs[input_id];
+-            if (input->buffer &&
+-                ggml_backend_buffer_get_usage(input->buffer) == GGML_BACKEND_BUFFER_USAGE_WEIGHTS &&
+-                ggml_backend_buffer_is_host(input->buffer)) {
+-                max_size = std::max(max_size, ggml_nbytes(input));
+-            }
+-        }
+-    }
+-    return max_size;
+-}
+-
+ static bool ggml_backend_sched_prefetch_init(ggml_backend_sched_t sched, ggml_backend_t split_backend, size_t size) {
+     if (sched->prefetch_backend == NULL) {
++        // on by default only for SYCL, whose backend runs the uploads of a second instance on their
++        // own queue through an upload thread; other backends need an explicit GGML_SCHED_PREFETCH_EXPERTS
++        if (getenv("GGML_SCHED_PREFETCH_EXPERTS") == NULL && strncmp(ggml_backend_name(split_backend), "SYCL", 4) != 0) {
++            sched->prefetch_experts = false;
++            return false;
++        }
+         ggml_backend_dev_t dev = split_backend->device;
+         ggml_backend_dev_props props;
+         ggml_backend_dev_get_props(dev, &props);
+@@ -1790,48 +1820,238 @@ static bool ggml_backend_sched_prefetch_init(ggml_backend_sched_t sched, ggml_ba
+             return false;
+         }
+         sched->prefetch_backend = ggml_backend_dev_init(dev, NULL);
+-        if (sched->prefetch_backend == NULL) {
++        sched->fixup_backend    = ggml_backend_dev_init(dev, NULL);
++        if (sched->prefetch_backend == NULL || sched->fixup_backend == NULL) {
+             sched->prefetch_experts = false;
+             return false;
+         }
+         for (int i = 0; i < sched->prefetch_n_slots; i++) {
+             sched->prefetch_ready[i] = ggml_backend_event_new(dev);
+             sched->prefetch_free[i]  = ggml_backend_event_new(dev);
+-            if (sched->prefetch_ready[i] == NULL || sched->prefetch_free[i] == NULL) {
++            sched->fixup_ready[i]    = ggml_backend_event_new(dev);
++            if (sched->prefetch_ready[i] == NULL || sched->prefetch_free[i] == NULL || sched->fixup_ready[i] == NULL) {
+                 sched->prefetch_experts = false;
+                 return false;
+             }
+         }
+     }
+ 
+-    size = std::max(size, ggml_backend_sched_prefetch_max_size(sched));
++    GGML_UNUSED(size);
++    return true;
++}
+ 
++// Slots are allocated lazily at the size of the tensor that first needs them, and chosen by size:
++// a split takes the least recently used launched slot that is large enough, a new slot while the
++// ring has room and the device has memory (GGML_SCHED_PREFETCH_MIN_FREE_MB margin, default 256),
++// or grows the least recently used launched slot if that fits. The gate/up tensors of a layer are
++// smaller than its down tensor, so the slots settle into a few of each size and six of them cost
++// about what three maximum-sized ones would. Returns -1 when nothing fits: that split is copied
++// the plain way and the prefetch stays on for the others.
++static int ggml_backend_sched_prefetch_pick_slot(ggml_backend_sched_t sched, ggml_backend_t split_backend, size_t need) {
++    int best = -1;
++    for (int i = 0; i < sched->prefetch_n_slots; i++) {
++        if (sched->prefetch_slots[i] == NULL || sched->prefetch_slot_inflight[i]) { continue; }
++        if (ggml_backend_buffer_get_size(sched->prefetch_slots[i]) < need) { continue; }
++        if (best < 0 || sched->prefetch_slot_last[i] < sched->prefetch_slot_last[best]) { best = i; }
++    }
++    if (best >= 0) {
++        return best;
++    }
++    const char * env_margin = getenv("GGML_SCHED_PREFETCH_MIN_FREE_MB");
++    const size_t margin = (size_t) (env_margin ? atoi(env_margin) : 256) << 20;
++    size_t dev_free = 0, dev_total = 0;
++    ggml_backend_dev_memory(split_backend->device, &dev_free, &dev_total);
+     ggml_backend_buffer_type_t buft = ggml_backend_get_default_buffer_type(split_backend);
++    // a new slot
++    for (int i = 0; i < sched->prefetch_n_slots; i++) {
++        if (sched->prefetch_slots[i] != NULL) { continue; }
++        if (dev_total > 0 && dev_free < need + margin) { break; }
++        ggml_backend_buffer_t buf = ggml_backend_buft_alloc_buffer(buft, need);
++        if (buf == NULL) { break; }
++        sched->prefetch_slots[i] = buf;
++        sched->prefetch_used[i]  = false;
++        return i;
++    }
++    // grow the least recently used launched slot
++    int lru = -1;
+     for (int i = 0; i < sched->prefetch_n_slots; i++) {
+-        if (sched->prefetch_slots[i] == NULL || ggml_backend_buffer_get_size(sched->prefetch_slots[i]) < size) {
+-            // allocate before freeing so a failure leaves the old slot intact
+-            ggml_backend_buffer_t new_buf = ggml_backend_buft_alloc_buffer(buft, size);
+-            if (new_buf == NULL) {
+-                // overlap needs at least 2 slots, otherwise run with what fits
+-                if (i >= 2 && sched->prefetch_slots[0] != NULL &&
+-                    ggml_backend_buffer_get_size(sched->prefetch_slots[0]) >= size) {
+-                    sched->prefetch_n_slots = i;
+-                    sched->prefetch_cur = 0;
+-                    return true;
++        if (sched->prefetch_slots[i] == NULL || sched->prefetch_slot_inflight[i]) { continue; }
++        if (lru < 0 || sched->prefetch_slot_last[i] < sched->prefetch_slot_last[lru]) { lru = i; }
++    }
++    if (lru >= 0) {
++        const size_t have = ggml_backend_buffer_get_size(sched->prefetch_slots[lru]);
++        if (dev_total == 0 || dev_free + have >= need + margin) {
++            if (sched->prefetch_used[lru]) {
++                ggml_backend_event_synchronize(sched->prefetch_free[lru]); // its last split is done with it
++            }
++            ggml_backend_synchronize(sched->prefetch_backend);
++            ggml_backend_synchronize(sched->fixup_backend);
++            ggml_backend_buffer_free(sched->prefetch_slots[lru]);
++            sched->prefetch_slots[lru] = ggml_backend_buft_alloc_buffer(buft, need);
++            sched->prefetch_used[lru]  = false;
++            if (sched->prefetch_slots[lru] != NULL) {
++                return lru;
++            }
++        }
++    }
++    static bool warned = false;
++    if (!warned) {
++        GGML_LOG_WARN("%s: expert prefetch: no slot for a %zu MiB tensor (%zu MiB free on the device); such splits are copied directly\n",
++                      __func__, need >> 20, dev_free >> 20);
++        warned = true;
++    }
++    return -1;
++}
++
++// GGML_SCHED_TIMING=1: per-graph wall time inside the scheduler, split into input copies
++// (weights and activations), compute per backend, and the rest (host-side scheduling).
++#include <chrono>
++struct ggml_sched_timing_state {
++    double copy_s = 0, scan_s = 0, other_s = 0;
++    double compute_s[16] = {0};
++    size_t copy_bytes = 0; int n_splits = 0;
++    int64_t n_used_experts = 0, n_rows_cold = 0, n_rows_total = 0, n_ids_tensors = 0; // MoE routing seen by the sparse copies
++};
++static ggml_sched_timing_state g_sched_timing;
++static bool ggml_sched_timing_enabled() { static const bool e = getenv("GGML_SCHED_TIMING") != nullptr; return e; }
++// =1 synchronizes after every split (exact per-backend compute time, no overlap); =2 only times the host
++static bool ggml_sched_timing_sync() { static const bool e = getenv("GGML_SCHED_TIMING") != nullptr && atoi(getenv("GGML_SCHED_TIMING")) < 2; return e; }
++static double ggml_sched_now() { return std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count(); }
++
++// host copy of the routing ids of the split being launched (see ggml-backend-impl.h)
++static struct { const ggml_tensor * tensor = nullptr; const void * data = nullptr; size_t size = 0; } g_sched_host_copy;
++const void * ggml_backend_sched_host_copy(const struct ggml_tensor * tensor, size_t * size) {
++    if (tensor == nullptr || g_sched_host_copy.tensor != tensor) {
++        return nullptr;
++    }
++    if (size) { *size = g_sched_host_copy.size; }
++    return g_sched_host_copy.data;
++}
++
++// Issue the expert prefetch for a batched MUL_MAT_ID split whose weights live on the host: the
++// experts the weight tensor used in its previous batched evaluation are uploaded into a prefetch
++// slot through the prefetch backend, so the copy runs while earlier splits compute. When the split
++// is reached, the routing ids are read and only the experts used now but not prefetched are copied
++// (fixup), so the result is exact. Without history (first batch) nothing is issued and the split
++// falls back to the plain sparse copy; GGML_SCHED_PREFETCH_FULL=1 uploads the whole tensor instead.
++static bool ggml_backend_sched_prefetch_issue(ggml_backend_sched_t sched, struct ggml_backend_sched_split * split) {
++    if (split->prefetch_tried) {
++        return split->prefetch_slot != -1;
++    }
++    split->prefetch_tried = true;
++    if (!sched->prefetch_experts || sched->callback_eval || split->graph.n_nodes == 0) {
++        return false;
++    }
++    ggml_tensor * node = split->graph.nodes[0];
++    if (node->op != GGML_OP_MUL_MAT_ID) {
++        return false;
++    }
++    ggml_backend_t split_backend = sched->backends[split->backend_id];
++    for (int input_id = 0; input_id < split->n_inputs; input_id++) {
++        ggml_tensor * input = split->inputs[input_id];
++        ggml_tensor * input_cpy = tensor_copy(input, split->backend_id, sched->cur_copy);
++        if (node->src[0] != input_cpy) {
++            continue;
++        }
++        if (input->buffer == NULL ||
++            ggml_backend_buffer_get_usage(input->buffer) != GGML_BACKEND_BUFFER_USAGE_WEIGHTS ||
++            !ggml_backend_buffer_is_host(input->buffer)) {
++            return false;
++        }
++        const ggml_tensor * ids = node->src[2];
++        const int64_t n_expert = input->ne[2];
++        static const bool prefetch_full = getenv("GGML_SCHED_PREFETCH_FULL") != nullptr;
++        const std::vector<ggml_bitset_t> * hist = nullptr;
++        std::vector<ggml_bitset_t> hist_combined;
++        if (sched->expert_history) {
++            auto it = sched->expert_history->sets.find(input);
++            if (it != sched->expert_history->sets.end()) { hist = &it->second; }
++            if (hist != nullptr && sched->expert_history->mode != 0) {
++                auto itp = sched->expert_history->prev.find(input);
++                if (itp != sched->expert_history->prev.end() && itp->second.size() == hist->size()) {
++                    hist_combined = *hist;
++                    for (size_t w = 0; w < hist_combined.size(); w++) {
++                        hist_combined[w] = sched->expert_history->mode == 1 ? (hist_combined[w] & itp->second[w]) : (hist_combined[w] | itp->second[w]);
++                    }
++                    hist = &hist_combined;
+                 }
+-                ggml_backend_sched_prefetch_disable(sched, split_backend);
++            }
++        }
++        if (ids->ne[0]*ids->ne[1] < 2*n_expert || (hist == nullptr && !prefetch_full)) {
++            return false;
++        }
++        if (hist != nullptr) {
++            // a batch well under the size of the one that produced the history would prefetch
++            // much more than it uses (the tail micro-batch of a prompt): copy exactly instead
++            auto it = sched->expert_history->n_rows.find(input);
++            if (it != sched->expert_history->n_rows.end() && 4*ids->ne[0]*ids->ne[1] < 3*it->second) {
+                 return false;
+             }
+-            if (sched->prefetch_slots[i] != NULL) {
+-                ggml_backend_synchronize(split_backend);
+-                ggml_backend_synchronize(sched->prefetch_backend);
+-                ggml_backend_buffer_free(sched->prefetch_slots[i]);
++        }
++        if (!ggml_backend_sched_prefetch_init(sched, split_backend, ggml_nbytes(input))) {
++            return false;
++        }
++        const int slot = ggml_backend_sched_prefetch_pick_slot(sched, split_backend, ggml_nbytes(input));
++        if (slot < 0) {
++            return false;
++        }
++        sched->prefetch_slot_inflight[slot] = true;
++        sched->prefetch_slot_last[slot]     = sched->prefetch_seq++;
++        // the previous user of this slot must be done computing (a device-side wait on the prefetch queue)
++        if (sched->prefetch_used[slot]) {
++            ggml_backend_event_wait(sched->prefetch_backend, sched->prefetch_free[slot]);
++        }
++        // point the staging copy at the slot until this split has been launched
++        split->prefetch_input_cpy    = input_cpy;
++        split->prefetch_saved_buffer = input_cpy->buffer;
++        split->prefetch_saved_data   = input_cpy->data;
++        input_cpy->buffer = sched->prefetch_slots[slot];
++        input_cpy->data   = ggml_backend_buffer_get_base(sched->prefetch_slots[slot]);
++        if (hist != nullptr) {
++            const size_t expert_size = input->nb[2];
++            int32_t first_id = -1, last_id = -1;
++            auto flush = [&]() {
++                if (first_id < 0) { return; }
++                const size_t off = (size_t) first_id * expert_size;
++                const size_t len = (size_t) (last_id - first_id + 1) * expert_size + (last_id < n_expert - 1 ? std::min<size_t>(expert_size, 512) : 0);
++                ggml_backend_tensor_set_async(sched->prefetch_backend, input_cpy, (const uint8_t *) input->data + off, off, len);
++                g_sched_timing.copy_bytes += len;
++                first_id = -1;
++            };
++            for (int32_t id = 0; id < n_expert; id++) {
++                if (!ggml_bitset_get(hist->data(), id)) { continue; }
++                if (first_id >= 0 && id == last_id + 1) { last_id = id; continue; }
++                flush(); first_id = id; last_id = id;
+             }
+-            sched->prefetch_slots[i] = new_buf;
+-            sched->prefetch_used[i] = false;
++            flush();
++            split->prefetch_from_history = true;
++            sched->prefetch_slot_set[slot] = *hist;
++        } else {
++            ggml_backend_tensor_set_async(sched->prefetch_backend, input_cpy, input->data, 0, ggml_nbytes(input));
++            g_sched_timing.copy_bytes += ggml_nbytes(input);
++            split->prefetch_from_history = false;
++        }
++        ggml_backend_event_record(sched->prefetch_ready[slot], sched->prefetch_backend);
++        split->prefetch_slot = slot;
++        sched->prefetch_inflight++;
++        return true;
++    }
++    return false;
++}
++
++// keep up to prefetch_ahead MoE splits beyond the launched ones uploading; the slot picked next is
++// always one whose previous split has been launched, so its free event exists
++static void ggml_backend_sched_prefetch_lookahead(ggml_backend_sched_t sched, int from_split) {
++    if (!sched->prefetch_experts || sched->callback_eval) {
++        return;
++    }
++    const int ahead = std::max(1, std::min(sched->prefetch_ahead, sched->prefetch_n_slots - 1)); // pick_slot refuses what does not fit
++    for (int s = from_split; s < sched->n_splits && sched->prefetch_inflight < ahead; s++) {
++        ggml_backend_sched_prefetch_issue(sched, &sched->splits[s]);
++        if (!sched->prefetch_experts) {
++            return;
+         }
+     }
+-    return true;
+ }
+ 
+ static enum ggml_status ggml_backend_sched_compute_splits(ggml_backend_sched_t sched) {
+@@ -1849,14 +2069,29 @@ static enum ggml_status ggml_backend_sched_compute_splits(ggml_backend_sched_t s
+ 
+     int prev_backend_id = -1;
+ 
++    for (int i = 0; i < sched->n_splits; i++) {
++        splits[i].prefetch_slot = -1;
++        splits[i].prefetch_tried = false;
++    }
++    sched->prefetch_inflight = 0;
++    for (int i = 0; i < GGML_SCHED_MAX_PREFETCH_SLOTS; i++) { sched->prefetch_slot_inflight[i] = false; }
++    if (sched->prefetch_disable_pending) {
++        ggml_backend_sched_prefetch_disable(sched, sched->backends[0]);
++    }
++
++    const bool sched_timing = ggml_sched_timing_enabled();
++    double t_graph0 = sched_timing ? ggml_sched_now() : 0, t_mark = t_graph0;
++    auto sched_lap = [&](double & acc) { if (!sched_timing) return; const double t = ggml_sched_now(); acc += t - t_mark; t_mark = t; };
+     for (int split_id = 0; split_id < sched->n_splits; split_id++) {
+         struct ggml_backend_sched_split * split = &splits[split_id];
+         int split_backend_id = split->backend_id;
+         ggml_backend_t split_backend = sched->backends[split_backend_id];
+         int split_prefetch_slot = -1;
+-        ggml_tensor * prefetch_input_cpy = NULL;
+-        ggml_backend_buffer_t prefetch_saved_buffer = NULL;
+-        void * prefetch_saved_data = NULL;
++        bool prefetched_from_history = false;
++        bool split_fixups_issued = false;
++
++        // uploads for the MoE splits ahead start now, while the splits before them run
++        ggml_backend_sched_prefetch_lookahead(sched, split_id);
+ 
+         // an async CPU split may still be computing; join before anything that
+         // depends on it: another CPU split, or a split reading a CPU tensor
+@@ -1899,39 +2134,18 @@ static enum ggml_status ggml_backend_sched_compute_splits(ggml_backend_sched_t s
+                 }
+                 ggml_backend_tensor_copy(input, input_cpy);
+             } else {
+-                // with a large batch virtually every expert is used, so instead of waiting
+-                // for the routing ids, upload the full tensor through the prefetch backend
+-                // and let the copy overlap compute of the previous split
+-                if (sched->prefetch_experts && !sched->callback_eval && split_prefetch_slot == -1 && split->graph.n_nodes > 0) {
+-                    ggml_tensor * node = split->graph.nodes[0];
+-                    if (ggml_backend_buffer_get_usage(input->buffer) == GGML_BACKEND_BUFFER_USAGE_WEIGHTS &&
+-                        ggml_backend_buffer_is_host(input->buffer) &&
+-                        node->op == GGML_OP_MUL_MAT_ID && node->src[0] == input_cpy) {
+-                        const ggml_tensor * ids = node->src[2];
+-                        const int64_t n_expert = input->ne[2];
+-                        if (ids->ne[0]*ids->ne[1] >= 2*n_expert &&
+-                            ggml_backend_sched_prefetch_init(sched, split_backend, ggml_nbytes(input))) {
+-                            const int slot = sched->prefetch_cur;
+-                            sched->prefetch_cur = (sched->prefetch_cur + 1) % sched->prefetch_n_slots;
+-                            // wait for the previous user of this slot to finish computing
+-                            if (sched->prefetch_used[slot]) {
+-                                ggml_backend_event_wait(sched->prefetch_backend, sched->prefetch_free[slot]);
+-                            }
+-                            // point the staging copy at the slot only for the duration of
+-                            // this split, so a fallback to the regular path on a later
+-                            // eval can never see a dangling slot pointer
+-                            prefetch_input_cpy    = input_cpy;
+-                            prefetch_saved_buffer = input_cpy->buffer;
+-                            prefetch_saved_data   = input_cpy->data;
+-                            input_cpy->buffer = sched->prefetch_slots[slot];
+-                            input_cpy->data   = ggml_backend_buffer_get_base(sched->prefetch_slots[slot]);
+-                            ggml_backend_tensor_set_async(sched->prefetch_backend, input_cpy, input->data, 0, ggml_nbytes(input));
+-                            ggml_backend_event_record(sched->prefetch_ready[slot], sched->prefetch_backend);
+-                            ggml_backend_event_wait(split_backend, sched->prefetch_ready[slot]);
+-                            split_prefetch_slot = slot;
+-                            continue;
+-                        }
++                // MoE weights with a large batch: the experts this tensor used in its previous batched
++                // evaluation have been uploading into a prefetch slot since before the earlier splits
++                // were launched (ggml_backend_sched_prefetch_lookahead). The routing ids are read
++                // below and only the experts used now but not prefetched are copied (fixup).
++                if (split->prefetch_slot != -1 && input_cpy == split->prefetch_input_cpy) {
++                    split_prefetch_slot = split->prefetch_slot;
++                    prefetched_from_history = split->prefetch_from_history;
++                    sched_lap(g_sched_timing.copy_s);
++                    if (!prefetched_from_history) {
++                        continue;
+                     }
++                    // history prefetch: fall through to the sparse path for the fixup copies
+                 }
+ 
+                 // wait for the split backend to finish using the input before overwriting it
+@@ -1977,6 +2191,7 @@ static enum ggml_status ggml_backend_sched_compute_splits(ggml_backend_sched_t s
+                         // find the used experts
+                         used_ids.clear();
+                         used_ids.resize(ggml_bitset_size(n_expert));
++                        int64_t n_rows_cold = 0;
+                         for (int64_t i1 = 0; i1 < ids_tensor->ne[1]; i1++) {
+                             for (int64_t i0 = 0; i0 < ids_tensor->ne[0]; i0++) {
+                                 int32_t id = ids[i1 * ids_tensor->nb[1]/sizeof(int32_t) + i0 * ids_tensor->nb[0]/sizeof(int32_t)];
+@@ -1985,20 +2200,34 @@ static enum ggml_status ggml_backend_sched_compute_splits(ggml_backend_sched_t s
+                                 }
+                                 GGML_ASSERT(id < n_expert);
+                                 ggml_bitset_set(used_ids.data(), id);
++                                n_rows_cold++;
+                             }
+                         }
++                        if (sched_timing) {
++                            int64_t n_used = 0;
++                            for (int64_t e = 0; e < n_expert; e++) { n_used += ggml_bitset_get(used_ids.data(), e) ? 1 : 0; }
++                            g_sched_timing.n_used_experts += n_used;
++                            g_sched_timing.n_rows_cold    += n_rows_cold;
++                            g_sched_timing.n_rows_total   += ids_tensor->ne[0]*ids_tensor->ne[1];
++                            g_sched_timing.n_ids_tensors++;
++                        }
+ 
+                         prev_ids_tensor = ids_tensor;
+                     }
+ 
+-                    // group consecutive experts and copy them together
++                    // group consecutive experts and copy them together; for a prefetched split the
++                    // fixups go through the prefetch backend too (its upload thread), and the
++                    // slot's ready event is re-recorded behind them below
++                    ggml_backend_t copy_backend = (prefetched_from_history && split_prefetch_slot != -1) ? sched->fixup_backend : split_backend;
+                     auto copy_experts = [&](int32_t first_id, int32_t last_id) {
+                         const size_t expert_offset = first_id * expert_size;
+                         const size_t expert_size_copy =  (last_id - first_id + 1) * expert_size;
+                         const size_t padding = std::min<size_t>(expert_size, 512);
+                         const size_t padding_end = last_id < n_expert - 1 ? padding : 0;
+ 
+-                        ggml_backend_tensor_set_async(split_backend,
++                        sched_lap(g_sched_timing.scan_s);
++                        g_sched_timing.copy_bytes += expert_size_copy + padding_end;
++                        ggml_backend_tensor_set_async(copy_backend,
+                             input_cpy,
+                             (const uint8_t *)input->data + expert_offset, expert_offset,
+                             // copy a bit extra at the to ensure there are no NaNs in the padding of the last expert
+@@ -2006,29 +2235,91 @@ static enum ggml_status ggml_backend_sched_compute_splits(ggml_backend_sched_t s
+                             expert_size_copy + padding_end);
+                     };
+ 
++                    // experts to copy now: all used ones, or with a history prefetch only those
++                    // used now that were not in the prefetched set
++                    std::vector<ggml_bitset_t> copy_ids = used_ids;
++                    if (prefetched_from_history && split_prefetch_slot != -1) {
++                        const std::vector<ggml_bitset_t> & hist = sched->prefetch_slot_set[split_prefetch_slot];
++                        for (size_t b = 0; b < copy_ids.size() && b < hist.size(); b++) {
++                            copy_ids[b] &= ~hist[b];
++                        }
++                    }
++                    if (sched->prefetch_experts) {
++                        if (sched->expert_history == nullptr) {
++                            sched->expert_history = new ggml_sched_expert_history();
++                            const char * m = getenv("GGML_SCHED_PREFETCH_HIST");
++                            sched->expert_history->mode = m == nullptr ? 0 : strcmp(m, "and") == 0 ? 1 : strcmp(m, "or") == 0 ? 2 : 0;
++                        }
++                        if (sched->expert_history->mode != 0) {
++                            auto it = sched->expert_history->sets.find(input);
++                            if (it != sched->expert_history->sets.end()) { sched->expert_history->prev[input] = it->second; }
++                        }
++                        sched->expert_history->sets[input] = used_ids;
++                        sched->expert_history->n_rows[input] = ids_tensor->ne[0]*ids_tensor->ne[1];
++                    }
++
+                     int id = 0;
+-                    while (!ggml_bitset_get(used_ids.data(), id)) {
++                    while (id < n_expert && !ggml_bitset_get(copy_ids.data(), id)) {
+                         id++;
+                     }
+-                    int32_t first_id = id;
+-                    int32_t last_id = first_id;
++                    if (id < n_expert) {
++                        int32_t first_id = id;
++                        int32_t last_id = first_id;
+ 
+-                    for (++id; id < n_expert; ++id) {
+-                        if (!ggml_bitset_get(used_ids.data(), id)) {
+-                            continue;
+-                        }
++                        for (++id; id < n_expert; ++id) {
++                            if (!ggml_bitset_get(copy_ids.data(), id)) {
++                                continue;
++                            }
+ 
+-                        if (id == last_id + 1) {
++                            if (id == last_id + 1) {
++                                last_id = id;
++                                continue;
++                            }
++
++                            copy_experts(first_id, last_id);
++
++                            sched_lap(g_sched_timing.copy_s);
++
++                            first_id = id;
+                             last_id = id;
+-                            continue;
+                         }
+-
+                         copy_experts(first_id, last_id);
+-
+-                        first_id = id;
+-                        last_id = id;
+                     }
+-                    copy_experts(first_id, last_id);
++                    if (copy_backend == sched->fixup_backend) {
++                        ggml_backend_event_record(sched->fixup_ready[split_prefetch_slot], sched->fixup_backend);
++                        split_fixups_issued = true;
++                    }
++                    // the backend may take the routing ids from here while launching this split
++                    g_sched_host_copy.tensor = node->src[2];
++                    g_sched_host_copy.data   = ids.data();
++                    g_sched_host_copy.size   = ids.size() * sizeof(int32_t);
++                    sched_lap(g_sched_timing.copy_s);
++
++                    // GGML_SCHED_PREFETCH_VERIFY=1: read every used expert back from the device copy and
++                    // compare it with the host tensor (slow; a correctness oracle for the upload paths)
++                    static const bool verify = getenv("GGML_SCHED_PREFETCH_VERIFY") != nullptr;
++                    if (verify) {
++                        if (split_prefetch_slot != -1) {
++                            ggml_backend_event_wait(split_backend, sched->prefetch_ready[split_prefetch_slot]);
++                            if (split_fixups_issued) { ggml_backend_event_wait(split_backend, sched->fixup_ready[split_prefetch_slot]); }
++                        }
++                        ggml_backend_synchronize(split_backend);
++                        std::vector<uint8_t> buf(expert_size);
++                        int64_t n_bad = 0, n_checked = 0;
++                        for (int64_t e = 0; e < n_expert; e++) {
++                            if (!ggml_bitset_get(used_ids.data(), e)) { continue; }
++                            ggml_backend_tensor_get(input_cpy, buf.data(), e*expert_size, expert_size);
++                            n_checked++;
++                            if (memcmp(buf.data(), (const uint8_t *) input->data + e*expert_size, expert_size) != 0) { n_bad++; }
++                        }
++                        static int64_t total_bad = 0, total_checked = 0;
++                        total_bad += n_bad; total_checked += n_checked;
++                        if (n_bad > 0 || (split_id % 50) == 0) {
++                            GGML_LOG_INFO("prefetch verify: %s: %lld of %lld used experts differ (prefetched %d), totals %lld / %lld\n",
++                                          input->name, (long long) n_bad, (long long) n_checked, split_prefetch_slot != -1 ? 1 : 0,
++                                          (long long) total_bad, (long long) total_checked);
++                        }
++                    }
+                 } else {
+                     // try async copy, but if not possible, we can still use a sync copy without synchronizing the dst backend, since we handle the synchronization here with multiple copies and events
+                     // TODO: add public function to facilitate this, since applications do not have direct access to the backend interface
+@@ -2052,13 +2343,27 @@ static enum ggml_status ggml_backend_sched_compute_splits(ggml_backend_sched_t s
+                 sched->cpu_async->launch(split_backend, &split->graph);
+                 continue;
+             }
++            if (split_prefetch_slot != -1) {
++                // the kernels of this split wait for the slot uploads on the device; issued only now so
++                // that the host sync for the routing ids above did not have to wait for the upload
++                ggml_backend_event_wait(split_backend, sched->prefetch_ready[split_prefetch_slot]);
++                if (split_fixups_issued) {
++                    ggml_backend_event_wait(split_backend, sched->fixup_ready[split_prefetch_slot]);
++                }
++            }
++            sched_lap(g_sched_timing.other_s);
+             enum ggml_status ec = ggml_backend_graph_compute_async(split_backend, &split->graph);
++            g_sched_host_copy.tensor = nullptr;
++            if (sched_timing) { if (ggml_sched_timing_sync()) { ggml_backend_synchronize(split_backend); } sched_lap(g_sched_timing.compute_s[split_backend_id & 15]); }
+             if (split_prefetch_slot != -1) {
+                 // the kernels have captured the slot address at launch, safe to restore
+                 ggml_backend_event_record(sched->prefetch_free[split_prefetch_slot], split_backend);
+                 sched->prefetch_used[split_prefetch_slot] = true;
+-                prefetch_input_cpy->buffer = prefetch_saved_buffer;
+-                prefetch_input_cpy->data   = prefetch_saved_data;
++                sched->prefetch_slot_inflight[split_prefetch_slot] = false;
++                split->prefetch_input_cpy->buffer = split->prefetch_saved_buffer;
++                split->prefetch_input_cpy->data   = split->prefetch_saved_data;
++                split->prefetch_slot = -1;
++                sched->prefetch_inflight--;
+             }
+             if (ec != GGML_STATUS_SUCCESS) {
+                 return ec;
+@@ -2112,6 +2417,29 @@ static enum ggml_status ggml_backend_sched_compute_splits(ggml_backend_sched_t s
+         }
+     }
+ 
++    if (sched_timing) {
++        sched_lap(g_sched_timing.other_s);
++        if (!ggml_sched_timing_sync()) {
++            // finish the graph so that wall covers the device work too
++            for (int b = 0; b < sched->n_backends; b++) { ggml_backend_synchronize(sched->backends[b]); }
++            if (sched->prefetch_backend) { ggml_backend_synchronize(sched->prefetch_backend); }
++            sched_lap(g_sched_timing.compute_s[15]);
++        }
++        g_sched_timing.n_splits += sched->n_splits;
++        const double wall = ggml_sched_now() - t_graph0;
++        static double acc_wall = 0; static int acc_graphs = 0; acc_wall += wall; acc_graphs++;
++        if (sched->graph.n_nodes >= 4000) {
++            fprintf(stderr, "[sched timing] graph %d nodes, %d splits: wall %.3f s | copies %.3f s (%zu MiB) | expert scan %.3f s | other host %.3f s | compute:",
++                    sched->graph.n_nodes, sched->n_splits, wall, g_sched_timing.copy_s, g_sched_timing.copy_bytes >> 20, g_sched_timing.scan_s, g_sched_timing.other_s);
++            for (int b = 0; b < sched->n_backends && b < 16; b++) {
++                fprintf(stderr, " %s %.3f s", ggml_backend_name(sched->backends[b]), g_sched_timing.compute_s[b]);
++            }
++            if (!ggml_sched_timing_sync()) { fprintf(stderr, " | final sync %.3f s", g_sched_timing.compute_s[15]); }
++            fprintf(stderr, " | routing: %lld ids tensors, cold rows %lld of %lld, used cold experts %lld\n",
++                    (long long) g_sched_timing.n_ids_tensors, (long long) g_sched_timing.n_rows_cold, (long long) g_sched_timing.n_rows_total, (long long) g_sched_timing.n_used_experts);
++            g_sched_timing = ggml_sched_timing_state();
++        }
++    }
+     return GGML_STATUS_SUCCESS;
+ }
+ 
+@@ -2186,10 +2514,15 @@ ggml_backend_sched_t ggml_backend_sched_new(
+     // directly; more slots let uploads run further ahead of compute at the cost of one
+     // max-sized expert tensor of device memory per slot
+     const char * GGML_SCHED_PREFETCH_EXPERTS = getenv("GGML_SCHED_PREFETCH_EXPERTS");
+-    const int prefetch_n_slots = GGML_SCHED_PREFETCH_EXPERTS ? atoi(GGML_SCHED_PREFETCH_EXPERTS) : 0;
++    // default on: the history-based sparse prefetch adds no copy volume; GGML_SCHED_PREFETCH_EXPERTS=0 disables
++    const int prefetch_n_slots = GGML_SCHED_PREFETCH_EXPERTS ? atoi(GGML_SCHED_PREFETCH_EXPERTS) : 1;
+     sched->prefetch_experts = op_offload && prefetch_n_slots > 0;
+     // default of 3 covers the gate/up/down expert tensors of one MoE layer
+-    sched->prefetch_n_slots = prefetch_n_slots <= 1 ? 3 : std::min(prefetch_n_slots, GGML_SCHED_MAX_PREFETCH_SLOTS);
++    sched->prefetch_n_slots = prefetch_n_slots <= 1 ? 6 : std::min(prefetch_n_slots, GGML_SCHED_MAX_PREFETCH_SLOTS);
++    // MoE splits kept uploading beyond the launched ones; bounded by the slots minus one
++    const char * GGML_SCHED_PREFETCH_AHEAD = getenv("GGML_SCHED_PREFETCH_AHEAD");
++    sched->prefetch_ahead = GGML_SCHED_PREFETCH_AHEAD ? std::max(1, atoi(GGML_SCHED_PREFETCH_AHEAD)) : 4;
++    sched->prefetch_inflight = 0;
+ 
+ 
+     ggml_backend_sched_reset(sched);
+@@ -2212,11 +2545,14 @@ void ggml_backend_sched_free(ggml_backend_sched_t sched) {
+         for (int i = 0; i < GGML_SCHED_MAX_PREFETCH_SLOTS; i++) {
+             ggml_backend_event_free(sched->prefetch_ready[i]);
+             ggml_backend_event_free(sched->prefetch_free[i]);
++            ggml_backend_event_free(sched->fixup_ready[i]);
+             ggml_backend_buffer_free(sched->prefetch_slots[i]);
+         }
+         ggml_backend_free(sched->prefetch_backend);
++        ggml_backend_free(sched->fixup_backend);
+     }
+     delete sched->cpu_async;
++    delete sched->expert_history;
+     ggml_gallocr_free(sched->galloc);
+     ggml_free(sched->ctx);
+     ggml_hash_set_free(&sched->hash_set);
+diff --git a/ggml/src/ggml-sycl/common.hpp b/ggml/src/ggml-sycl/common.hpp
+index b5f75ca..1aeeaf4 100644
+--- a/ggml/src/ggml-sycl/common.hpp
++++ b/ggml/src/ggml-sycl/common.hpp
+@@ -17,6 +17,7 @@
+ #include <fstream>
+ #include <iostream>
+ #include <string>
++#include <memory>
+ 
+ #include "base.hpp"
+ #include "dpct/helper.hpp"
+@@ -328,6 +329,8 @@ struct mmid_row_mapping {
+ };
+ 
+ namespace sycl_ex = sycl::ext::oneapi::experimental;
++struct ggml_sycl_staging_ring;
++struct ggml_sycl_upload_worker;
+ struct ggml_backend_sycl_context {
+     int device;
+     std::string name;
+@@ -335,15 +338,50 @@ struct ggml_backend_sycl_context {
+ 
+     queue_ptr qptrs[GGML_SYCL_MAX_DEVICES][GGML_SYCL_MAX_STREAMS] = { { nullptr } };
+ 
++    // the first context on a device runs on the device's default in-order queue; every later
++    // one (the scheduler's prefetch backend) gets its own in-order queue, so its uploads can
++    // overlap the compute queue. GGML_SYCL_SHARED_QUEUE=1 restores the shared queue.
++    bool own_queue = false;
++    int  instance  = 0; // 0: the compute context, 1: the scheduler's prefetch instance, 2: its fixup instance
++    std::unique_ptr<sycl::queue> own_q;
++
++    // pinned staging ring for uploads from pageable memory (one per queue) and, for a context
++    // with its own queue, the upload thread that runs them (GGML_SYCL_UPLOAD_WORKER=0 disables)
++    ggml_sycl_staging_ring *  staging = nullptr;
++    ggml_sycl_upload_worker * worker  = nullptr;
++
++    // pinned host buffers for the row maps of batched mul_mat_id launches, so those uploads are
++    // asynchronous and the launch does not have to drain the queue first
++    struct mmid_host_buf { char * p = nullptr; size_t cap = 0; sycl::event ev; bool used = false; };
++    mmid_host_buf mmid_host[4];
++    int           mmid_host_next = 0;
++
+     explicit ggml_backend_sycl_context(int device) :
+         device(device),
+         name(GGML_SYCL_NAME + std::to_string(device)) {
+         opt_feature = ggml_sycl_info().devices[device].opt_feature;
++        static int n_contexts[GGML_SYCL_MAX_DEVICES] = { 0 };
++        instance  = n_contexts[device]++;
++        own_queue = instance > 0 && getenv("GGML_SYCL_SHARED_QUEUE") == nullptr;
+     }
+ 
+     queue_ptr stream(int device, int stream) {
+         if (qptrs[device][stream] == nullptr) {
+-            qptrs[device][stream] = &(dpct::get_device(device).default_queue());
++            if (stream == 0 && own_queue) {
++                // built directly, not through dpct's create_queue: that registers the queue in the
++                // device's queue list, and the buffer's synchronous set_tensor drains that whole
++                // list (queues_wait_and_throw), which would serialize every activation upload of
++                // the compute backend behind this queue's outstanding expert uploads
++                sycl::queue & dq = dpct::get_device(device).default_queue();
++#ifdef DPCT_PROFILING_ENABLED
++                own_q.reset(new sycl::queue(dq.get_context(), dq.get_device(), sycl::property_list{ sycl::property::queue::in_order(), sycl::property::queue::enable_profiling() }));
++#else
++                own_q.reset(new sycl::queue(dq.get_context(), dq.get_device(), sycl::property::queue::in_order()));
++#endif
++                qptrs[device][stream] = own_q.get();
++            } else {
++                qptrs[device][stream] = &(dpct::get_device(device).default_queue());
++            }
+         }
+         return qptrs[device][stream];
+     }
 diff --git a/ggml/src/ggml-sycl/ggml-sycl.cpp b/ggml/src/ggml-sycl/ggml-sycl.cpp
-index 4b8e03b..19a1e7a 100644
+index 4b8e03b..8800fe3 100644
 --- a/ggml/src/ggml-sycl/ggml-sycl.cpp
 +++ b/ggml/src/ggml-sycl/ggml-sycl.cpp
-@@ -11,6 +11,8 @@
+@@ -11,6 +11,10 @@
  //
  
  #include <algorithm>
 +static bool ggml_sycl_op_timing_enabled();
 +static void ggml_sycl_op_timing_add_copy(double s, size_t bytes);
++struct ggml_backend_sycl_context;
++static void ggml_sycl_ctx_free_uploads(struct ggml_backend_sycl_context * ctx);
  #include <array>
  #include <assert.h>
  #include <atomic>
-@@ -52,6 +54,8 @@
+@@ -52,6 +56,12 @@
  
  #include "ggml.h"
  #include "ggml-sycl.h"
 +#include "moe-xmx.hpp"
 +#include <mutex>
++#include <thread>
++#include <deque>
++#include <condition_variable>
++#include <chrono>
  #include "ggml-impl.h"
  #include "ggml-backend-impl.h"
  
-@@ -4992,6 +4996,645 @@ static int64_t mmid_counting_sort_rows(
+@@ -4992,6 +5002,669 @@ static int64_t mmid_counting_sort_rows(
      return n_used;
  }
  
@@ -224,14 +1047,38 @@ index 4b8e03b..19a1e7a 100644
 +        n_pad += padded;
 +    }
 +
-+    ggml_sycl_pool_alloc<mmid_row_mapping> dev_rows(ctx.pool(), n_used);
-+    ggml_sycl_pool_alloc<int32_t>          dev_pad_row(ctx.pool(), n_used);
-+    ggml_sycl_pool_alloc<moe_xmx_tile>     dev_tiles(ctx.pool(), tiles.size());
-+    ggml_sycl_pool_alloc<sycl::half>       a_pad(ctx.pool(), (size_t) n_pad * K);
-+    ggml_sycl_pool_alloc<float>            c_pad(ctx.pool(), (size_t) n_pad * M);
-+    SYCL_CHECK(CHECK_TRY_ERROR(stream->memcpy(dev_rows.get(), routed.data(), n_used * sizeof(mmid_row_mapping))));
-+    SYCL_CHECK(CHECK_TRY_ERROR(stream->memcpy(dev_pad_row.get(), pad_row.data(), n_used * sizeof(int32_t))));
-+    SYCL_CHECK(CHECK_TRY_ERROR(stream->memcpy(dev_tiles.get(), tiles.data(), tiles.size() * sizeof(moe_xmx_tile))));
++    // the three row maps go up in one asynchronous copy from a pinned buffer; the buffer is one of
++    // four, reused only once the copy that last read it is done (a wait that is long satisfied)
++    const size_t rows_bytes = n_used * sizeof(mmid_row_mapping);
++    const size_t pad_bytes  = n_used * sizeof(int32_t);
++    const size_t tile_bytes = tiles.size() * sizeof(moe_xmx_tile);
++    const size_t off_pad    = (rows_bytes + 255) & ~(size_t) 255;
++    const size_t off_tiles  = (off_pad + pad_bytes + 255) & ~(size_t) 255;
++    const size_t maps_bytes = off_tiles + tile_bytes;
++    ggml_backend_sycl_context::mmid_host_buf & hb = ctx.mmid_host[ctx.mmid_host_next];
++    ctx.mmid_host_next = (ctx.mmid_host_next + 1) % 4;
++    if (hb.used) {
++        hb.ev.wait();
++        hb.used = false;
++    }
++    if (hb.cap < maps_bytes) {
++        if (hb.p != nullptr) { sycl::free(hb.p, *stream); }
++        hb.cap = maps_bytes + maps_bytes / 4;
++        hb.p   = (char *) sycl::malloc_host(hb.cap, *stream);
++        GGML_ASSERT(hb.p != nullptr);
++    }
++    memcpy(hb.p,             routed.data(),  rows_bytes);
++    memcpy(hb.p + off_pad,   pad_row.data(), pad_bytes);
++    memcpy(hb.p + off_tiles, tiles.data(),   tile_bytes);
++
++    ggml_sycl_pool_alloc<char>       dev_maps(ctx.pool(), maps_bytes);
++    ggml_sycl_pool_alloc<sycl::half> a_pad(ctx.pool(), (size_t) n_pad * K);
++    ggml_sycl_pool_alloc<float>      c_pad(ctx.pool(), (size_t) n_pad * M);
++    hb.ev   = stream->memcpy(dev_maps.get(), hb.p, maps_bytes);
++    hb.used = true;
++    struct { mmid_row_mapping * get() const { return p; } mmid_row_mapping * p; } dev_rows{ (mmid_row_mapping *) dev_maps.get() };
++    struct { int32_t * get() const { return p; } int32_t * p; } dev_pad_row{ (int32_t *) (dev_maps.get() + off_pad) };
++    struct { moe_xmx_tile * get() const { return p; } moe_xmx_tile * p; } dev_tiles{ (moe_xmx_tile *) (dev_maps.get() + off_tiles) };
 +    SYCL_CHECK(CHECK_TRY_ERROR(stream->memset(a_pad.get(), 0, (size_t) n_pad * K * sizeof(sycl::half))));
 +
 +    const unsigned int max_wg = ggml_sycl_info().max_work_group_sizes[ctx.device];
@@ -666,12 +1513,44 @@ index 4b8e03b..19a1e7a 100644
  static void ggml_sycl_mul_mat_id(ggml_backend_sycl_context & ctx,
                                   ggml_tensor *dst) try {
      scope_op_debug_print scope_dbg_print(__func__, dst, /*num_src=*/3);
-@@ -5071,6 +5714,18 @@ static void ggml_sycl_mul_mat_id(ggml_backend_sycl_context & ctx,
+@@ -5016,11 +5689,21 @@ static void ggml_sycl_mul_mat_id(ggml_backend_sycl_context & ctx,
+     std::vector<char> ids_host(ggml_nbytes(ids));
+     const char * ids_dev = (const char *) ids->data;
+ 
+-    SYCL_CHECK(CHECK_TRY_ERROR(
+-        stream->memcpy(ids_host.data(), ids_dev, ggml_nbytes(ids))));
+-
+-    // also ensures ctx.mmid_row_mapping_host is drained before we use it again
+-    SYCL_CHECK(CHECK_TRY_ERROR(stream->wait()));
++    // the scheduler has usually just read the ids back for its expert copies: taking them from it
++    // avoids draining the queue here, which would also wait for the expert uploads this launch is
++    // queued behind, blocking the host for the whole transfer
++    size_t host_ids_size = 0;
++    const void * host_ids = ggml_backend_sched_host_copy(ids, &host_ids_size);
++    bool drained = false;
++    if (host_ids != nullptr && host_ids_size == ggml_nbytes(ids)) {
++        memcpy(ids_host.data(), host_ids, host_ids_size);
++    } else {
++        SYCL_CHECK(CHECK_TRY_ERROR(
++            stream->memcpy(ids_host.data(), ids_dev, ggml_nbytes(ids))));
++        // also ensures ctx.mmid_row_mapping_host is drained before we use it again
++        SYCL_CHECK(CHECK_TRY_ERROR(stream->wait()));
++        drained = true;
++    }
+ 
+     ggml_tensor src0_row = *src0;
+     ggml_tensor src1_row = *src1;
+@@ -5071,6 +5754,23 @@ static void ggml_sycl_mul_mat_id(ggml_backend_sycl_context & ctx,
              }
          }
      } else {
 +        if (ggml_sycl_mul_mat_id_xmx(ctx, src0, src1, ids, dst, ids_host.data())) {
 +            return;
++        }
++        if (!drained) {
++            // the remaining paths reuse host-side row maps that earlier launches may still be reading
++            SYCL_CHECK(CHECK_TRY_ERROR(stream->wait()));
++            drained = true;
 +        }
 +        if (ggml_sycl_mul_mat_id_groups(ctx, src0, src1, ids, dst, ids_host.data())) {
 +            return;
@@ -685,72 +1564,377 @@ index 4b8e03b..19a1e7a 100644
          const int64_t n_routed_rows = ids->ne[1] * n_ids;
          ggml_sycl_pool_alloc<char> src1_contiguous(ctx.pool(), sizeof(float)*n_routed_rows*ne10);
          ggml_sycl_pool_alloc<char>  dst_contiguous(ctx.pool(), sizeof(float)*n_routed_rows*ne0);
-@@ -5686,6 +6341,55 @@ static void ggml_backend_sycl_free(ggml_backend_t backend) {
+@@ -5682,10 +6382,354 @@ static const char * ggml_backend_sycl_get_name(ggml_backend_t backend) {
+ static void ggml_backend_sycl_free(ggml_backend_t backend) {
+     ggml_backend_sycl_context * sycl_ctx = (ggml_backend_sycl_context *)backend->context;
+ 
++    ggml_sycl_ctx_free_uploads(sycl_ctx);
+     delete sycl_ctx;
      delete backend;
  }
  
-+// Upload from pageable host memory (the mmap'd model) through a pinned, double-buffered
-+// staging ring so that the host memcpy into pinned memory overlaps the DMA into device
-+// memory. A Level Zero memcpy straight from pageable memory runs far below link speed, and
-+// that is exactly what the scheduler's per-micro-batch copies of the used experts hit.
++// ---- GGML_SYCL_TIMELINE=<file> ---------------------------------------------------------------
++// Device timestamps of every staged upload chunk and every compute split, one block per graph.
++// Needs queues created with profiling (build with -DDPCT_PROFILING_ENABLED); events on queues
++// without it are skipped. Analyzed by scratchpad/timeline.py.
++struct ggml_sycl_timeline {
++    struct entry {
++        const char * queue;
++        const char * kind;
++        sycl::event  begin;   // for splits: the barrier before the split (its end = split start)
++        sycl::event  ev;
++        size_t       bytes;
++        std::string  label;
++    };
++    std::mutex         m;
++    std::vector<entry> entries;
++    FILE *             f       = nullptr;
++    int                graph   = 0;
++    bool               enabled = false;
++
++    ggml_sycl_timeline() {
++        const char * p = getenv("GGML_SYCL_TIMELINE");
++        if (p != nullptr) {
++            f = fopen(p, "w");
++            enabled = f != nullptr;
++        }
++    }
++    void add(const char * queue, const char * kind, const sycl::event & ev, size_t bytes, std::string label = "", const sycl::event * begin = nullptr) {
++        if (!enabled) { return; }
++        std::lock_guard<std::mutex> lock(m);
++        entries.push_back({ queue, kind, begin ? *begin : sycl::event(), ev, bytes, std::move(label) });
++    }
++    // after a full synchronize of the compute context: every recorded event is complete
++    void flush() {
++        if (!enabled) { return; }
++        std::lock_guard<std::mutex> lock(m);
++        if (entries.empty()) { return; }
++        fprintf(f, "graph %d\n", graph++);
++        for (auto & e : entries) {
++            try {
++                const uint64_t t1 = e.ev.get_profiling_info<sycl::info::event_profiling::command_end>();
++                uint64_t t0 = e.ev.get_profiling_info<sycl::info::event_profiling::command_start>();
++                if (e.kind[0] == 's') { // split: from the end of the barrier before it
++                    t0 = e.begin.get_profiling_info<sycl::info::event_profiling::command_end>();
++                }
++                fprintf(f, "%s %s %llu %llu %zu %s\n", e.queue, e.kind, (unsigned long long) t0, (unsigned long long) t1, e.bytes, e.label.c_str());
++            } catch (...) {
++                // queue without profiling
++            }
++        }
++        entries.clear();
++        fflush(f);
++    }
++};
++static ggml_sycl_timeline g_sycl_timeline;
++
++// ---- uploads from pageable host memory -------------------------------------------------------
++//
++// A Level Zero memcpy straight from pageable memory (the mmap'd model) runs far below link speed,
++// and that is exactly what the scheduler's per-micro-batch copies of the used experts hit. The
++// staging ring copies through pinned chunks: the host memcpy into one chunk overlaps the DMA of
++// the chunks before it. One ring per backend context, i.e. per queue, so that a ring never waits
++// for a DMA that sits behind another queue's kernels.
 +struct ggml_sycl_staging_ring {
-+    std::mutex   mutex;
-+    char *       buf[2]  = { nullptr, nullptr };
-+    sycl::event  ev[2];
-+    bool         used[2] = { false, false };
-+    int          next    = 0;
-+    size_t       chunk   = 0;
++    std::vector<char *>      buf;
++    std::vector<sycl::event> ev;
++    std::vector<bool>        used;
++    int                      next   = 0;
++    size_t                   chunk  = 0;
++    bool                     failed = false;
++    const char *             tag    = "cmp"; // timeline queue tag
 +};
 +
-+static bool ggml_sycl_upload_pageable(queue_ptr stream, int device, void * dst, const void * src, size_t size) {
-+    static const bool enabled = getenv("GGML_SYCL_STAGED_UPLOAD") != nullptr;
-+    if (!enabled || size < ((size_t) 1 << 20)) {
-+        return false; // no measurable gain on a B580 over PCIe Gen 3 x8; opt-in
++// GGML_SYCL_OP_TIMING: time the rings spend waiting for DMAs vs copying into pinned memory
++struct ggml_sycl_staging_stats {
++    std::mutex m;
++    double t_wait = 0, t_memcpy = 0;
++    size_t bytes = 0;
++    double t_worker_busy = 0, t_event_block = 0; // upload thread busy time, host time blocked on its records
++    int    n_direct = 0; size_t direct_bytes = 0; // copies that bypassed the ring
++};
++static ggml_sycl_staging_stats g_sycl_staging_stats;
++
++static bool ggml_sycl_upload_pageable(queue_ptr stream, ggml_sycl_staging_ring & r, void * dst, const void * src, size_t size) {
++    static const bool disabled = getenv("GGML_SYCL_DISABLE_STAGED_UPLOAD") != nullptr;
++    // an isolated used expert is a copy of about 0.6 MiB, and the direct pageable path is slowest
++    // exactly there, so everything above a few KiB goes through the ring
++    static const size_t min_size = (size_t) (getenv("GGML_SYCL_STAGING_MIN_KB") ? atoi(getenv("GGML_SYCL_STAGING_MIN_KB")) : 16) << 10;
++    if (disabled || r.failed || size < min_size) {
++        return false;
 +    }
 +    if (sycl::get_pointer_type(src, stream->get_context()) != sycl::usm::alloc::unknown) {
 +        return false; // already USM memory, the direct copy is the fast path
 +    }
-+    static ggml_sycl_staging_ring rings[GGML_SYCL_MAX_DEVICES];
-+    ggml_sycl_staging_ring & r = rings[device];
-+    std::lock_guard<std::mutex> lock(r.mutex);
-+    if (r.buf[0] == nullptr) {
-+        const char * env = getenv("GGML_SYCL_STAGING_CHUNK_MB");
-+        r.chunk = (size_t) (env ? atoi(env) : 32) << 20;
-+        for (int i = 0; i < 2; i++) {
-+            r.buf[i] = (char *) sycl::malloc_host(r.chunk, *stream);
-+            if (r.buf[i] == nullptr) {
-+                r.chunk = 0;
-+                return false;
++    if (r.buf.empty()) {
++        const char * env_mb = getenv("GGML_SYCL_STAGING_CHUNK_MB");
++        const char * env_n  = getenv("GGML_SYCL_STAGING_CHUNKS");
++        r.chunk = (size_t) std::max(1, env_mb ? atoi(env_mb) : 8) << 20;
++        const int n = std::max(2, env_n ? atoi(env_n) : 8);
++        for (int i = 0; i < n; i++) {
++            char * p = (char *) sycl::malloc_host(r.chunk, *stream);
++            if (p == nullptr) {
++                r.failed = true;
++                break;
 +            }
++            r.buf.push_back(p);
++        }
++        if (r.failed) {
++            for (char * p : r.buf) {
++                sycl::free(p, *stream);
++            }
++            r.buf.clear();
++            return false;
++        }
++        r.ev.resize(n);
++        r.used.assign(n, false);
++    }
++    const bool timing = ggml_sycl_op_timing_enabled();
++    double t_wait = 0, t_memcpy = 0;
++    const int n = (int) r.buf.size();
++    for (size_t off = 0; off < size; off += r.chunk) {
++        const int    i   = r.next;
++        const size_t len = std::min(r.chunk, size - off);
++        r.next = (r.next + 1) % n;
++        const auto t0 = timing ? std::chrono::steady_clock::now() : std::chrono::steady_clock::time_point();
++        if (r.used[i]) {
++            r.ev[i].wait(); // the DMA that last read this chunk must be done before it is overwritten
++        }
++        const auto t1 = timing ? std::chrono::steady_clock::now() : std::chrono::steady_clock::time_point();
++        memcpy(r.buf[i], (const char *) src + off, len);
++        r.ev[i]   = stream->memcpy((char *) dst + off, r.buf[i], len);
++        r.used[i] = true;
++        g_sycl_timeline.add(r.tag, "dma", r.ev[i], len);
++        if (timing) {
++            t_wait   += std::chrono::duration<double>(t1 - t0).count();
++            t_memcpy += std::chrono::duration<double>(std::chrono::steady_clock::now() - t1).count();
 +        }
 +    }
-+    for (size_t off = 0; off < size; off += r.chunk) {
-+        const int    i = r.next;
-+        const size_t n = std::min(r.chunk, size - off);
-+        r.next ^= 1;
-+        if (r.used[i]) {
-+            r.ev[i].wait(); // the DMA that last read this staging buffer must be done before we overwrite it
-+        }
-+        memcpy(r.buf[i], (const char *) src + off, n);
-+        r.ev[i]   = stream->memcpy((char *) dst + off, r.buf[i], n);
-+        r.used[i] = true;
++    if (timing) {
++        std::lock_guard<std::mutex> lock(g_sycl_staging_stats.m);
++        g_sycl_staging_stats.t_wait   += t_wait;
++        g_sycl_staging_stats.t_memcpy += t_memcpy;
++        g_sycl_staging_stats.bytes    += size;
 +    }
 +    return true;
++}
++
++static void ggml_sycl_staging_ring_free(ggml_sycl_staging_ring * r, queue_ptr stream) {
++    if (r == nullptr) {
++        return;
++    }
++    for (size_t i = 0; i < r->buf.size(); i++) {
++        if (r->used[i]) {
++            r->ev[i].wait();
++        }
++        sycl::free(r->buf[i], *stream);
++    }
++    delete r;
++}
++
++// a backend event: the sycl::event plus a "pending" state for events recorded through an upload
++// worker, which become valid only once the worker reaches the record request
++struct ggml_sycl_event_state {
++    sycl::event             ev;
++    std::mutex              m;
++    std::condition_variable cv;
++    bool                    pending = false;
++
++    void set_pending() {
++        std::lock_guard<std::mutex> lock(m);
++        pending = true;
++    }
++    void set(const sycl::event & e) {
++        {
++            std::lock_guard<std::mutex> lock(m);
++            ev = e;
++            pending = false;
++        }
++        cv.notify_all();
++    }
++    sycl::event get() {
++        std::unique_lock<std::mutex> lock(m);
++        cv.wait(lock, [&] { return !pending; });
++        return ev;
++    }
++};
++
++// The scheduler's prefetch backend hands its host->device copies, event records and event waits
++// to these threads, so the main thread never blocks in a staging ring's memcpy loop while it could
++// be launching kernels. Copies run concurrently on GGML_SYCL_UPLOAD_THREADS threads (default 3),
++// each with its own pinned ring: the memcpy out of the mmap'd model, with its page faults, is
++// slower per thread than the link. Event records and waits are ordering points: one is executed
++// only once every copy pushed before it has been launched, and nothing pushed after it starts
++// before it ran. ggml_backend_sycl_synchronize and get_tensor drain the queue first.
++struct ggml_sycl_upload_worker {
++    enum kind { COPY, RECORD, WAIT };
++    struct req {
++        kind                    k;
++        void *                  dst;
++        const void *            src;
++        size_t                  size;
++        ggml_sycl_event_state * ev;
++    };
++
++    queue_ptr                             stream;
++    std::vector<ggml_sycl_staging_ring *> rings;
++    std::vector<std::thread>              threads;
++    std::mutex                            m;
++    std::condition_variable               cv, cv_idle, cv_inflight;
++    std::deque<req>                       q;
++    int                                   inflight = 0; // copies popped but not yet launched
++    bool                                  stop = false;
++
++    ggml_sycl_upload_worker(queue_ptr stream, int n_threads, const char * tag) : stream(stream) {
++        for (int i = 0; i < n_threads; i++) {
++            rings.push_back(new ggml_sycl_staging_ring());
++            rings.back()->tag = tag;
++        }
++        for (int i = 0; i < n_threads; i++) {
++            threads.emplace_back([this, i] { run(rings[i]); });
++        }
++    }
++    ~ggml_sycl_upload_worker() {
++        {
++            std::lock_guard<std::mutex> lock(m);
++            stop = true;
++        }
++        cv.notify_all();
++        for (auto & t : threads) {
++            t.join();
++        }
++        for (auto * r : rings) {
++            ggml_sycl_staging_ring_free(r, stream);
++        }
++    }
++    void push(const req & r) {
++        {
++            std::lock_guard<std::mutex> lock(m);
++            q.push_back(r);
++        }
++        cv.notify_all();
++    }
++    void drain() {
++        std::unique_lock<std::mutex> lock(m);
++        cv_idle.wait(lock, [&] { return q.empty() && inflight == 0; });
++    }
++    void run(ggml_sycl_staging_ring * ring) try {
++        for (;;) {
++            req r;
++            {
++                std::unique_lock<std::mutex> lock(m);
++                cv.wait(lock, [&] { return stop || !q.empty(); });
++                if (q.empty()) {
++                    return; // stop requested and nothing left to run
++                }
++                if (q.front().k != COPY) {
++                    // ordering point: every copy pushed before it must have been launched
++                    cv_inflight.wait(lock, [&] { return inflight == 0 || stop; });
++                    if (q.empty() || q.front().k == COPY) {
++                        continue; // another thread took it
++                    }
++                    r = q.front();
++                    q.pop_front();
++                    if (r.k == RECORD) {
++                        r.ev->set(stream->ext_oneapi_submit_barrier());
++                    } else {
++                        const sycl::event e = r.ev->get();
++                        SYCL_CHECK(CHECK_TRY_ERROR(stream->ext_oneapi_submit_barrier({ e })));
++                    }
++                    if (q.empty()) {
++                        cv_idle.notify_all();
++                    }
++                    cv.notify_all();
++                    continue;
++                }
++                r = q.front();
++                q.pop_front();
++                inflight++;
++            }
++            const bool timing = ggml_sycl_op_timing_enabled();
++            const auto t0 = timing ? std::chrono::steady_clock::now() : std::chrono::steady_clock::time_point();
++            if (!ggml_sycl_upload_pageable(stream, *ring, r.dst, r.src, r.size)) {
++                SYCL_CHECK(CHECK_TRY_ERROR(stream->memcpy(r.dst, r.src, r.size)));
++                if (timing) { std::lock_guard<std::mutex> lock(g_sycl_staging_stats.m); g_sycl_staging_stats.n_direct++; g_sycl_staging_stats.direct_bytes += r.size; }
++            }
++            if (timing) {
++                std::lock_guard<std::mutex> lock(g_sycl_staging_stats.m);
++                g_sycl_staging_stats.t_worker_busy += std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
++            }
++            {
++                std::lock_guard<std::mutex> lock(m);
++                inflight--;
++                if (inflight == 0) {
++                    cv_inflight.notify_all();
++                    if (q.empty()) {
++                        cv_idle.notify_all();
++                    }
++                }
++            }
++        }
++    } catch (sycl::exception const & exc) {
++        std::cerr << exc.what() << "Exception caught at file:" << __FILE__ << ", line:" << __LINE__ << std::endl;
++        std::exit(1);
++    }
++};
++
++static ggml_sycl_staging_ring * ggml_sycl_ctx_ring(ggml_backend_sycl_context * ctx) {
++    if (ctx->staging == nullptr) {
++        ctx->staging = new ggml_sycl_staging_ring();
++        ctx->staging->tag = ctx->instance == 0 ? "cmp" : ctx->instance == 1 ? "pre" : "fix";
++    }
++    return ctx->staging;
++}
++
++// the upload thread exists only for contexts with their own queue (the scheduler's prefetch
++// backend); the compute context keeps its uploads on the calling thread
++static ggml_sycl_upload_worker * ggml_sycl_ctx_worker(ggml_backend_sycl_context * ctx) {
++    static const bool enabled = [] { const char * e = getenv("GGML_SYCL_UPLOAD_WORKER"); return e == nullptr || atoi(e) != 0; }();
++    if (!enabled || !ctx->own_queue) {
++        return nullptr;
++    }
++    if (ctx->worker == nullptr) {
++        const char * e = getenv("GGML_SYCL_UPLOAD_THREADS");
++        ctx->worker = new ggml_sycl_upload_worker(ctx->stream(ctx->device, 0), std::max(1, e ? atoi(e) : 3), ctx->instance == 1 ? "pre" : "fix");
++    }
++    return ctx->worker;
++}
++
++static void ggml_sycl_ctx_free_uploads(ggml_backend_sycl_context * ctx) {
++    delete ctx->worker; // drains, then joins
++    ctx->worker = nullptr;
++    for (auto & hb : ctx->mmid_host) {
++        if (hb.p != nullptr) {
++            if (hb.used) { hb.ev.wait(); }
++            sycl::free(hb.p, *ctx->stream(ctx->device, 0));
++            hb.p = nullptr;
++        }
++    }
++    if (ctx->staging != nullptr) {
++        ggml_sycl_staging_ring_free(ctx->staging, ctx->stream(ctx->device, 0));
++        ctx->staging = nullptr;
++    }
 +}
 +
  static void ggml_backend_sycl_set_tensor_async(ggml_backend_t backend,
                                                 ggml_tensor *tensor,
                                                 const void *data, size_t offset,
-@@ -5698,8 +6402,14 @@ static void ggml_backend_sycl_set_tensor_async(ggml_backend_t backend,
+@@ -5698,8 +6742,20 @@ static void ggml_backend_sycl_set_tensor_async(ggml_backend_t backend,
  
      GGML_ASSERT(buf->buft == ggml_backend_sycl_buffer_type(sycl_ctx->device) && "unsupported buffer type");
      const queue_ptr stream = sycl_ctx->stream(sycl_ctx->device, 0);
 -    SYCL_CHECK(CHECK_TRY_ERROR(
 -        (stream)->memcpy((char *)tensor->data + offset, data, size)));
++    if (ggml_sycl_upload_worker * w = ggml_sycl_ctx_worker(sycl_ctx)) {
++        // the source must stay valid until the worker has copied it: the scheduler only uploads
++        // host-resident weights through a prefetch backend
++        w->push({ ggml_sycl_upload_worker::COPY, (char *) tensor->data + offset, data, size, nullptr });
++        return;
++    }
 +    const bool timing = ggml_sycl_op_timing_enabled();
 +    std::chrono::steady_clock::time_point t0;
 +    if (timing) { stream->wait(); t0 = std::chrono::steady_clock::now(); }
-+    if (!ggml_sycl_upload_pageable(stream, sycl_ctx->device, (char *) tensor->data + offset, data, size)) {
++    if (!ggml_sycl_upload_pageable(stream, *ggml_sycl_ctx_ring(sycl_ctx), (char *) tensor->data + offset, data, size)) {
 +        SYCL_CHECK(CHECK_TRY_ERROR(
 +            (stream)->memcpy((char *)tensor->data + offset, data, size)));
 +    }
@@ -758,7 +1942,31 @@ index 4b8e03b..19a1e7a 100644
  }
  catch (sycl::exception const &exc) {
    std::cerr << exc.what() << "Exception caught at file:" << __FILE__
-@@ -5850,9 +6560,53 @@ static int ggml_sycl_try_gdn_cache_fusion(const ggml_cgraph * cgraph, int node_i
+@@ -5719,6 +6775,9 @@ static void ggml_backend_sycl_get_tensor_async(ggml_backend_t backend,
+ 
+     GGML_ASSERT(buf->buft == ggml_backend_sycl_buffer_type(sycl_ctx->device) && "unsupported buffer type");
+     const queue_ptr stream = sycl_ctx->stream(sycl_ctx->device, 0);
++    if (sycl_ctx->worker != nullptr) {
++        sycl_ctx->worker->drain();
++    }
+     SYCL_CHECK(CHECK_TRY_ERROR((stream)->memcpy(
+         data, (const char *)tensor->data + offset, size)));
+ }
+@@ -5762,7 +6821,13 @@ static void ggml_backend_sycl_synchronize(ggml_backend_t backend) try {
+     GGML_SYCL_DEBUG("[SYCL] call %s\n", __func__);
+     ggml_backend_sycl_context * sycl_ctx = (ggml_backend_sycl_context *)backend->context;
+     const queue_ptr stream = sycl_ctx->stream(sycl_ctx->device, 0);
++    if (sycl_ctx->worker != nullptr) {
++        sycl_ctx->worker->drain();
++    }
+     SYCL_CHECK(CHECK_TRY_ERROR((stream)->wait()));
++    if (!sycl_ctx->own_queue) {
++        g_sycl_timeline.flush();
++    }
+ 
+     GGML_UNUSED(backend);
+ }
+@@ -5850,9 +6915,68 @@ static int ggml_sycl_try_gdn_cache_fusion(const ggml_cgraph * cgraph, int node_i
      return skip;
  }
  
@@ -784,6 +1992,21 @@ index 4b8e03b..19a1e7a 100644
 +            g_sycl_timing.copy_s > 0 ? g_sycl_timing.copy_bytes / g_sycl_timing.copy_s / 1e9 : 0.0);
 +    for (size_t i = 0; i < v.size() && i < 14; i++) {
 +        fprintf(stderr, "[SYCL timing]   %-40s %8.3f s  %5.1f%%\n", v[i].second.c_str(), v[i].first, 100.0 * v[i].first / total);
++    }
++    {
++        std::lock_guard<std::mutex> lock(g_sycl_staging_stats.m);
++        if (g_sycl_staging_stats.bytes > 0) {
++            const double t = g_sycl_staging_stats.t_wait + g_sycl_staging_stats.t_memcpy;
++            fprintf(stderr, "[SYCL timing]   staging rings: %zu MiB, memcpy %.3f s, dma wait %.3f s, %.2f GB/s over both | upload thread busy %.3f s, host blocked on its events %.3f s | direct copies %d (%zu MiB)\n",
++                    g_sycl_staging_stats.bytes >> 20, g_sycl_staging_stats.t_memcpy, g_sycl_staging_stats.t_wait,
++                    t > 0 ? g_sycl_staging_stats.bytes / t / 1e9 : 0.0,
++                    g_sycl_staging_stats.t_worker_busy, g_sycl_staging_stats.t_event_block,
++                    g_sycl_staging_stats.n_direct, g_sycl_staging_stats.direct_bytes >> 20);
++            g_sycl_staging_stats.t_wait = g_sycl_staging_stats.t_memcpy = 0;
++            g_sycl_staging_stats.bytes = 0;
++            g_sycl_staging_stats.t_worker_busy = g_sycl_staging_stats.t_event_block = 0;
++            g_sycl_staging_stats.n_direct = 0; g_sycl_staging_stats.direct_bytes = 0;
++        }
 +    }
 +    g_sycl_timing = ggml_sycl_op_timing_state();
 +}
@@ -812,7 +2035,7 @@ index 4b8e03b..19a1e7a 100644
      for (int i = 0; i < cgraph->n_nodes; i++) {
          ggml_tensor * node = cgraph->nodes[i];
          if (ggml_sycl_is_view_or_noop(node)) {
-@@ -5861,6 +6615,7 @@ static void ggml_backend_sycl_graph_compute_impl(ggml_backend_sycl_context * syc
+@@ -5861,6 +6985,7 @@ static void ggml_backend_sycl_graph_compute_impl(ggml_backend_sycl_context * syc
          if ((node->flags & GGML_TENSOR_FLAG_COMPUTE) == 0) {
              continue;
          }
@@ -820,7 +2043,7 @@ index 4b8e03b..19a1e7a 100644
  
          const int nodes_to_skip = ggml_sycl_fuse(*sycl_ctx, cgraph, i);
          if (nodes_to_skip != 0) {
-@@ -5909,6 +6664,12 @@ static void ggml_backend_sycl_graph_compute_impl(ggml_backend_sycl_context * syc
+@@ -5909,6 +7034,12 @@ static void ggml_backend_sycl_graph_compute_impl(ggml_backend_sycl_context * syc
          }
          GGML_ASSERT(ok);
      }
@@ -833,6 +2056,118 @@ index 4b8e03b..19a1e7a 100644
  }
  
  #ifdef GGML_SYCL_GRAPH
+@@ -5954,7 +7085,27 @@ static bool check_graph_compatibility(ggml_cgraph * cgraph) {
+ }
+ #endif
+ 
++static ggml_status ggml_backend_sycl_graph_compute_inner(ggml_backend_t backend, ggml_cgraph * cgraph);
++
+ static ggml_status ggml_backend_sycl_graph_compute(ggml_backend_t backend, ggml_cgraph * cgraph) {
++    if (!g_sycl_timeline.enabled) {
++        return ggml_backend_sycl_graph_compute_inner(backend, cgraph);
++    }
++    // timeline: a barrier before and after the split; the split's device span is between their ends
++    auto * sycl_ctx = static_cast<ggml_backend_sycl_context *>(backend->context);
++    const queue_ptr stream = sycl_ctx->stream();
++    const sycl::event begin = stream->ext_oneapi_submit_barrier();
++    const ggml_status st = ggml_backend_sycl_graph_compute_inner(backend, cgraph);
++    const sycl::event end = stream->ext_oneapi_submit_barrier();
++    std::string label = std::to_string(cgraph->n_nodes) + " nodes";
++    for (int i = 0; i < cgraph->n_nodes; i++) {
++        if (!ggml_sycl_is_view_or_noop(cgraph->nodes[i])) { label += std::string(" ") + ggml_op_name(cgraph->nodes[i]->op); break; }
++    }
++    g_sycl_timeline.add(sycl_ctx->instance == 0 ? "cmp" : sycl_ctx->instance == 1 ? "pre" : "fix", "split", end, 0, label, &begin);
++    return st;
++}
++
++static ggml_status ggml_backend_sycl_graph_compute_inner(ggml_backend_t backend, ggml_cgraph * cgraph) {
+     auto * sycl_ctx = static_cast<ggml_backend_sycl_context *>(backend->context);
+ 
+ #ifdef GGML_SYCL_GRAPH
+@@ -6009,11 +7160,17 @@ try
+     ggml_backend_sycl_context *sycl_ctx =
+         (ggml_backend_sycl_context *)backend->context;
+ 
+-    sycl::event *sycl_event = static_cast<sycl::event *>(event->context);
++    ggml_sycl_event_state * st = static_cast<ggml_sycl_event_state *>(event->context);
+ 
++    if (ggml_sycl_upload_worker * w = ggml_sycl_ctx_worker(sycl_ctx)) {
++        // recorded once the worker has launched everything pushed before this point
++        st->set_pending();
++        w->push({ ggml_sycl_upload_worker::RECORD, nullptr, nullptr, 0, st });
++        return;
++    }
+     const queue_ptr &stream = sycl_ctx->stream(sycl_ctx->device, 0);
+     // Record the current state of the queue
+-    SYCL_CHECK(CHECK_TRY_ERROR(*sycl_event = stream->ext_oneapi_submit_barrier()));
++    SYCL_CHECK(CHECK_TRY_ERROR(st->set(stream->ext_oneapi_submit_barrier())));
+ }
+ catch (sycl::exception const &exc)
+ {
+@@ -6024,10 +7181,25 @@ catch (sycl::exception const &exc)
+ 
+ static void ggml_backend_sycl_event_wait(ggml_backend_t backend, ggml_backend_event_t event) try {
+     GGML_SYCL_DEBUG("[SYCL] call %s\n", __func__);
+-    sycl::event* sycl_event = static_cast<sycl::event*>(event->context);
++    ggml_sycl_event_state * st = static_cast<ggml_sycl_event_state *>(event->context);
+ 
+     if (ggml_backend_is_sycl(backend)) {
+-        SYCL_CHECK(CHECK_TRY_ERROR(sycl_event->wait()));
++        // a device-side dependency: the backend's queue waits for the event, the host does not
++        ggml_backend_sycl_context * sycl_ctx = (ggml_backend_sycl_context *) backend->context;
++        if (ggml_sycl_upload_worker * w = ggml_sycl_ctx_worker(sycl_ctx)) {
++            w->push({ ggml_sycl_upload_worker::WAIT, nullptr, nullptr, 0, st });
++            return;
++        }
++        const queue_ptr stream = sycl_ctx->stream(sycl_ctx->device, 0);
++        // an event recorded through an upload worker is waited for on the host until it exists
++        const bool timing = ggml_sycl_op_timing_enabled();
++        const auto t0 = timing ? std::chrono::steady_clock::now() : std::chrono::steady_clock::time_point();
++        const sycl::event e = st->get();
++        if (timing) {
++            std::lock_guard<std::mutex> lock(g_sycl_staging_stats.m);
++            g_sycl_staging_stats.t_event_block += std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
++        }
++        SYCL_CHECK(CHECK_TRY_ERROR(stream->ext_oneapi_submit_barrier({ e })));
+     } else
+         GGML_ABORT("fatal error");
+ } catch (sycl::exception const& exc) {
+@@ -6604,11 +7776,11 @@ ggml_backend_sycl_device_event_new(ggml_backend_dev_t dev) {
+ #ifdef GGML_SYCL_NO_PEER_COPY
+     return nullptr;
+ #else
+-  sycl::event *event_ptr = new sycl::event();
++  ggml_sycl_event_state * st = new ggml_sycl_event_state();
+ 
+   return new ggml_backend_event{
+       /* .device = */ dev,
+-      /* .context = */ event_ptr,
++      /* .context = */ st,
+   };
+ #endif
+ }
+@@ -6620,8 +7792,8 @@ static void ggml_backend_sycl_device_event_free(ggml_backend_dev_t dev, ggml_bac
+   }
+ 
+   if (event->context != nullptr) {
+-    sycl::event *sycl_event = static_cast<sycl::event *>(event->context);
+-    delete sycl_event;
++    ggml_sycl_event_state * st = static_cast<ggml_sycl_event_state *>(event->context);
++    delete st;
+     event->context = nullptr;
+   }
+ 
+@@ -6637,8 +7809,8 @@ static void ggml_backend_sycl_device_event_synchronize(ggml_backend_dev_t dev, g
+   GGML_UNUSED(dev);
+   GGML_SYCL_DEBUG("[SYCL] call %s\n", __func__);
+ 
+-  sycl::event *sycl_event = static_cast<sycl::event *>(event->context);
+-  SYCL_CHECK(CHECK_TRY_ERROR(sycl_event->wait()));
++  ggml_sycl_event_state * st = static_cast<ggml_sycl_event_state *>(event->context);
++  SYCL_CHECK(CHECK_TRY_ERROR(st->get().wait()));
+ } catch (sycl::exception const &exc) {
+   std::cerr << exc.what() << "Exception caught at file:" << __FILE__
+             << ", line:" << __LINE__ << std::endl;
 diff --git a/ggml/src/ggml-sycl/mmvq.cpp b/ggml/src/ggml-sycl/mmvq.cpp
 index d89dd92..002dbb2 100644
 --- a/ggml/src/ggml-sycl/mmvq.cpp

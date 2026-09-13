@@ -217,3 +217,864 @@
 0.22.674.333 I load_tensors:   CPU_Mapped model buffer size = 30864.67 MiB
 0.22.674.334 I load_tensors:        SYCL0 model buffer size =  3816.16 MiB
 0.22.674.334 I load_tensors:   CPU_Mapped model buffer size = 27465.95 MiB
+0.34.824.141 I init_moe_expert_cache: expert cache: 48 layers x 48 slots, 4347.66 MiB uploaded to SYCL0
+0.34.829.361 I cmn  common_init_: added <|endoftext|> logit bias = -inf
+0.34.829.363 I cmn  common_init_: added <|im_end|> logit bias = -inf
+0.34.829.364 I cmn  common_init_: added <|fim_pad|> logit bias = -inf
+0.34.829.364 I cmn  common_init_: added <|repo_name|> logit bias = -inf
+0.34.829.365 I cmn  common_init_: added <|file_sep|> logit bias = -inf
+0.34.829.584 I llama_context: constructing llama_context
+0.34.829.588 I llama_context: n_seq_max             = 1
+0.34.829.588 I llama_context: n_ctx                 = 16384
+0.34.829.589 I llama_context: n_ctx_seq             = 16384
+0.34.829.589 I llama_context: n_batch               = 2048
+0.34.829.589 I llama_context: n_ubatch              = 2048
+0.34.829.589 I llama_context: causal_attn           = 1
+0.34.829.591 I llama_context: flash_attn            = enabled
+0.34.829.591 I llama_context: kv_unified            = false
+0.34.829.592 I llama_context: freq_base             = 10000000.0
+0.34.829.593 I llama_context: freq_scale            = 1
+0.34.829.593 I llama_context: n_rs_seq              = 0
+0.34.829.594 I llama_context: n_outputs_max         = 1
+0.34.829.594 I llama_context: n_outputs_max_per_seq = 1
+0.34.829.594 I llama_context: n_ctx_seq (16384) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.34.830.564 I llama_context:  SYCL_Host  output buffer size =     0.95 MiB
+0.34.831.274 I llama_kv_cache:      SYCL0 KV buffer size =   204.00 MiB
+0.34.834.486 I llama_kv_cache: size =  204.00 MiB ( 16384 cells,  12 layers,  1/1 seqs), K (q8_0):  102.00 MiB, V (q8_0):  102.00 MiB
+0.34.834.489 I llama_kv_cache: attn_rot_k = 1, n_embd_head_k_all = 256
+0.34.834.489 I llama_kv_cache: attn_rot_v = 1, n_embd_head_k_all = 256
+0.34.836.057 I llama_memory_recurrent:      SYCL0 RS buffer size =   112.57 MiB
+0.34.836.064 I llama_memory_recurrent: size =  112.57 MiB (     1 cells,  48 layers,  1 seqs  0 rs_seq), R (f32):    4.22 MiB, S (f32):  108.00 MiB, P (f32):    0.35 MiB
+0.34.836.070 I operator(): creating indexer KV cache, size = 16384 cells
+0.34.836.978 I llama_kv_cache:      SYCL0 KV buffer size =    76.51 MiB
+0.34.837.077 I llama_kv_cache: size =   76.50 MiB ( 16384 cells,  12 layers,  1/1 seqs), K (q8_0):   25.50 MiB, V (q8_0):   51.00 MiB
+0.34.837.079 I llama_kv_cache: attn_rot_k = 1, n_embd_head_k_all = 128
+0.34.837.079 I llama_kv_cache: attn_rot_v = 1, n_embd_head_k_all = 256
+0.34.837.132 I sched_reserve: reserving ...
+0.34.843.006 I resolve_fused_ops: resolving fused DeepSeek V4 HC support:
+0.34.846.294 I resolve_fused_ops: fused DeepSeek V4 HC pre enabled
+0.34.848.696 I resolve_fused_ops: fused DeepSeek V4 HC comb enabled
+0.34.851.023 I resolve_fused_ops: fused DeepSeek V4 HC post enabled
+0.34.876.895 I sched_reserve:      SYCL0 compute buffer size =  1466.28 MiB
+0.34.876.900 I sched_reserve:  SYCL_Host compute buffer size =   244.66 MiB
+0.34.876.900 I sched_reserve: graph nodes  = 8574
+0.34.876.901 I sched_reserve: graph splits = 169 (with bs=2048), 122 (with bs=1)
+0.34.876.904 I sched_reserve: reserve took 39.77 ms, sched copies = 1
+0.34.877.023 I cmn          init: llama threadpool init, n_threads = 6
+0.34.877.046 I cmn  common_init_: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+[sched timing] graph 8942 nodes, 122 splits: wall 7.049 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.019 s | compute: SYCL0 6.478 s CPU 0.552 s
+0.41.933.021 W srv    load_model: cache_reuse is not supported by this context, it will be disabled
+[sched timing] graph 8942 nodes, 122 splits: wall 0.547 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.008 s | compute: SYCL0 0.049 s CPU 0.490 s
+0.42.480.325 I cmn  common_conte: the context does not support partial sequence removal
+0.42.480.978 I srv    load_model: speculative decoding will use checkpoints
+0.42.480.980 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 16384, kv_unified = 'false'
+0.42.480.989 I spec common_specu: no implementations specified for speculative decoding
+0.42.480.993 I slot   load_model: id  0 | task -1 | new slot, n_ctx = 16384
+0.42.481.059 I srv    load_model: prompt cache is enabled, size limit: 8192 MiB
+0.42.481.060 I srv    load_model: use `--cache-ram 0` to disable the prompt cache
+0.42.481.062 I srv    load_model: for more info see https://github.com/ggml-org/llama.cpp/pull/16391
+0.42.481.062 I srv    load_model: context checkpoints enabled, max = 32, min spacing = 8192
+0.42.481.080 I srv          init: idle slots will be saved to prompt cache upon starting a new task
+0.42.489.444 I srv          init: init: chat template, example_format: '<|im_start|>system
+Reasoning effort is set to xhigh. Please think carefully through the task, validate key assumptions, consider plausible alternatives, and prioritize correctness, consistency, and clarity in the final answer.
+
+You are a helpful assistant<|im_end|>
+<|im_start|>user
+Hello<|im_end|>
+<|im_start|>assistant
+<think>
+
+</think>
+
+Hi there<|im_end|>
+<|im_start|>user
+How are you?<|im_end|>
+<|im_start|>assistant
+<think>
+'
+0.42.490.427 I srv          init: init: chat template, thinking = 1
+0.42.490.434 I srv          init: preserve_reasoning kwarg: true
+0.42.490.434 W srv          init: chat template supports preserving reasoning, it is enabled by default (may use more tokens, disable via --no-reasoning-preserve)
+0.42.490.459 I srv  llama_server: model loaded
+0.42.490.462 I srv  llama_server: listening on http://127.0.0.1:8089
+0.42.490.492 I srv  update_slots: all slots are idle
+0.44.162.249 I srv  server_strea: conv_id= (empty=1)
+0.44.163.868 I slot get_availabl: id  0 | task -1 |  - skipping, slot is empty
+0.44.163.869 I slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = -1
+0.44.163.869 I srv  get_availabl: updating prompt cache
+0.44.164.044 I srv          load:  - looking for better prompt, base f_keep = -1.000, f_sim = 0.000
+0.44.164.049 I srv        update:  - cache state: 0 prompts, 0.000 MiB (limits: 8192.000 MiB, 16384 tokens, 8589934592 est)
+0.44.164.050 I srv  get_availabl: prompt cache update took 0.18 ms
+0.44.164.072 I slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> min-p -> ?xtc -> temp-ext -> dist 
+0.44.164.078 I slot launch_slot_: id  0 | task -1 | sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+	top_k = 20, top_p = 0.950, min_p = 0.050, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+0.44.164.080 I slot launch_slot_: id  0 | task 0 | processing task, is_child = 0
+0.44.164.090 I slot   operator(): id  0 | task 0 | new prompt, n_ctx_slot = 16384, n_keep = 0, task.n_tokens = 18
+0.44.164.094 I slot   operator(): id  0 | task 0 | cached n_tokens = 0, memory_seq_rm [0, end)
+[sched timing] graph 8942 nodes, 122 splits: wall 1.718 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.034 s | compute: SYCL0 0.195 s CPU 1.488 s
+0.45.887.521 I slot   operator(): id  0 | task 0 | cached n_tokens = 14, memory_seq_rm [14, end)
+0.45.887.565 I slot init_sampler: id  0 | task 0 | init sampler, took 0.01 ms, tokens: text = 18, total = 18
+0.45.929.091 I slot create_check: id  0 | task 0 | created context checkpoint 1 of 32 (pos_min = 13, pos_max = 13, n_tokens = 14, size = 112.571 MiB)
+[sched timing] graph 8942 nodes, 122 splits: wall 0.385 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.010 s | compute: SYCL0 0.063 s CPU 0.312 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.564 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.469 s CPU 0.092 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.094 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.055 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.115 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.075 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.114 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.076 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.143 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.102 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.138 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.005 s | compute: SYCL0 0.036 s CPU 0.097 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.117 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.079 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.097 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.059 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.151 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.113 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.084 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.047 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.091 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.054 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.164 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.127 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.130 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.094 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.118 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.081 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.083 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.047 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.075 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.139 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.101 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.189 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.151 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.096 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.058 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.087 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.049 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.117 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.079 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.085 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.048 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.108 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.070 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.127 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.087 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.140 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.102 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.108 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.070 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.084 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.046 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.108 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.068 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.114 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.075 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.094 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.056 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.142 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.103 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.104 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.066 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.130 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.037 s CPU 0.089 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.087 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.049 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.138 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.100 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.091 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.054 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.108 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.071 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.174 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.136 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.119 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.082 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.126 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.088 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.115 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.077 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.124 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.087 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.042 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.099 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.061 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.103 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.066 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.090 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.053 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.094 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.057 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.080 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.044 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.084 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.048 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.095 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.059 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.118 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.082 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.128 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.092 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.120 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.084 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.169 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.132 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.133 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.096 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.112 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.075 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.109 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.070 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.130 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.005 s | compute: SYCL0 0.037 s CPU 0.088 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.134 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.096 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.094 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.057 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.115 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.078 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.082 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.044 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.094 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.057 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.092 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.055 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.126 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.088 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.149 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.111 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.122 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.085 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.089 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.052 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.085 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.048 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.090 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.053 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.087 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.050 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.090 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.053 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.098 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.061 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.098 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.062 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.086 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.049 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.083 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.047 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.089 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.052 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.120 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.083 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.092 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.055 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.104 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.068 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.094 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.057 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.092 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.055 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.084 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.048 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.088 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.051 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.134 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.094 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.090 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.051 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.108 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.070 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.093 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.054 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.081 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.043 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.076 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.038 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.098 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.061 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.114 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.077 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.097 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.060 s
+0.57.403.864 I slot print_timing: id  0 | task 0 | n_gen =    100, tg =   8.93 t/s, tg_3s =   9.02 t/s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.093 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.056 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.038 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.103 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.066 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.093 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.055 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.081 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.043 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.098 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.061 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.084 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.046 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.089 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.052 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.082 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.046 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.088 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.051 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.076 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.107 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.070 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.101 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.064 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.090 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.054 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.083 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.047 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.087 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.051 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.109 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.072 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.091 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.054 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.108 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.071 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.111 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.073 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.089 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.053 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.094 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.058 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.097 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.060 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.110 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.073 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.086 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.050 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.092 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.056 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.089 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.053 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.089 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.053 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.108 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.072 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.081 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.045 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.104 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.067 s
+1.00.466.981 I slot print_timing: id  0 | task 0 | n_gen =    133, tg =   9.33 t/s, tg_3s =  10.77 t/s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.138 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.099 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.079 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.044 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.093 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.057 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.093 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.058 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.089 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.054 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.097 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.061 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.079 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.043 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.083 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.048 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.079 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.043 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.153 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.116 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.129 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.093 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.110 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.074 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.085 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.050 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.085 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.050 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.108 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.072 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.114 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.078 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.088 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.053 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.097 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.061 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.106 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.070 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.096 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.061 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.085 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.049 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.093 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.055 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.101 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.063 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.042 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.111 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.075 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.092 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.056 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.102 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.066 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.075 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.094 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.056 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.081 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.045 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.109 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.073 s
+1.03.514.111 I slot print_timing: id  0 | task 0 | n_gen =    164, tg =   9.48 t/s, tg_3s =  10.17 t/s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.088 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.052 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.113 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.077 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.086 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.050 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.079 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.043 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.084 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.048 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.084 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.048 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.092 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.055 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.098 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.062 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.091 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.055 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.091 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.055 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.115 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.079 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.040 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.097 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.060 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.076 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.092 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.055 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.080 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.043 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.086 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.049 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.084 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.047 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.097 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.060 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.226 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.005 s | compute: SYCL0 0.033 s CPU 0.189 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.129 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.092 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.036 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.076 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.040 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.091 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.054 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.098 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.061 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.080 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.043 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.087 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.051 s
+1.06.536.307 I slot print_timing: id  0 | task 0 | n_gen =    197, tg =   9.70 t/s, tg_3s =  10.92 t/s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.090 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.053 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.090 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.054 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.042 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.087 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.050 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.095 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.058 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.150 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.111 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.092 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.053 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.088 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.052 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.094 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.058 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.131 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.094 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.087 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.051 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.084 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.046 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.042 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.081 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.045 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.036 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.081 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.045 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.114 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.076 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.105 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.069 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.131 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.095 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.109 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.073 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.119 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.083 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.153 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.116 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.043 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.151 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.114 s
+1.09.638.911 I slot print_timing: id  0 | task 0 | n_gen =    230, tg =   9.82 t/s, tg_3s =  10.64 t/s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.040 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.119 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.083 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.110 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.074 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.105 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.070 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.102 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.066 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.076 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.040 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.091 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.056 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.085 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.049 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.082 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.046 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.099 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.063 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.146 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.110 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.084 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.049 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.093 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.055 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.081 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.045 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.084 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.049 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.082 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.047 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.082 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.046 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.124 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.088 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.080 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.044 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.075 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.129 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.092 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.036 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.086 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.051 s
+1.12.049.539 I slot print_timing: id  0 | task 0 | prompt eval time =    2157.28 ms /    18 tokens (  119.85 ms per token,     8.34 tokens per second)
+1.12.049.542 I slot print_timing: id  0 | task 0 |        eval time =   25728.16 ms /   256 tokens (  100.89 ms per token,     9.91 tokens per second)
+1.12.049.543 I slot print_timing: id  0 | task 0 |       total time =   27885.44 ms /   274 tokens
+1.12.049.545 I slot print_timing: id  0 | task 0 |    graphs reused =        254
+1.12.049.574 I slot      release: id  0 | task 0 | stop processing: n_tokens = 273, truncated = 0
+1.12.049.582 I srv  update_slots: all slots are idle
+1.12.090.780 I srv  server_strea: conv_id= (empty=1)
+1.12.090.937 I slot get_availabl: id  0 | task -1 |  - checking sim = 1.000 (18/18) > 0.100
+1.12.090.940 I slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 1.000 (> 0.100 thold), f_keep = 0.066
+1.12.090.940 I srv  get_availabl: updating prompt cache
+1.12.090.998 I srv   prompt_save:  - saving prompt with length 273, total state size = 117.258 MiB (draft: 0.000 MiB)
+1.12.188.847 I srv          load:  - looking for better prompt, base f_keep = 0.066, f_sim = 1.000
+1.12.188.851 I srv          load:    - prompt with length     273, lcp =      18, f_keep = 0.066, f_sim = 1.000
+1.12.188.854 I srv        update:  - cache state: 1 prompts, 229.829 MiB (limits: 8192.000 MiB, 16384 tokens, 16384 est)
+1.12.188.855 I srv        update:    - prompt 0x4002eda0:     273 tokens, checkpoints:  1,   229.829 MiB
+1.12.188.856 I srv  get_availabl: prompt cache update took 97.92 ms
+1.12.188.888 I slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> min-p -> ?xtc -> temp-ext -> dist 
+1.12.188.894 I slot launch_slot_: id  0 | task -1 | sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+	top_k = 20, top_p = 0.950, min_p = 0.050, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+1.12.188.896 I slot launch_slot_: id  0 | task 258 | processing task, is_child = 0
+1.12.188.903 I slot   operator(): id  0 | task 258 | new prompt, n_ctx_slot = 16384, n_keep = 0, task.n_tokens = 18
+1.12.188.906 I slot   operator(): id  0 | task 258 | erased invalidated context checkpoint (pos_min = 13, pos_max = 13, n_tokens = 14, n_swa = 0, pos_next = 0, size = 112.571 MiB)
+1.12.190.202 I slot   operator(): id  0 | task 258 | cached n_tokens = 0, memory_seq_rm [0, end)
+[sched timing] graph 8942 nodes, 122 splits: wall 0.533 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.026 s | compute: SYCL0 0.144 s CPU 0.362 s
+1.12.728.462 I slot   operator(): id  0 | task 258 | cached n_tokens = 14, memory_seq_rm [14, end)
+1.12.728.512 I slot init_sampler: id  0 | task 258 | init sampler, took 0.00 ms, tokens: text = 18, total = 18
+1.12.787.101 I slot create_check: id  0 | task 258 | created context checkpoint 1 of 32 (pos_min = 13, pos_max = 13, n_tokens = 14, size = 112.571 MiB)
+[sched timing] graph 8942 nodes, 122 splits: wall 0.173 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.008 s | compute: SYCL0 0.062 s CPU 0.103 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.080 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.042 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.062 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.023 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.058 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.019 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.062 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.024 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.063 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.026 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.064 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.026 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.063 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.026 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.032 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.032 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.065 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.065 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.063 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.027 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.059 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.021 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.065 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.028 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.060 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.034 s CPU 0.023 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.062 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.025 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.059 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.020 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.063 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.026 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.060 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.035 s CPU 0.022 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.059 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.034 s CPU 0.021 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.058 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.035 s CPU 0.020 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.060 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.034 s CPU 0.022 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.060 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.034 s CPU 0.023 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.064 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.027 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.063 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.034 s CPU 0.026 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.064 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.027 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.065 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.028 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.082 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.042 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.075 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.038 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.032 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.032 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.032 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.032 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.032 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.075 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.085 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.047 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.032 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.032 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.032 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.032 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.032 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.032 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.063 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.034 s CPU 0.026 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.065 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.028 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.032 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.032 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.038 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.065 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.065 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.028 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.064 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.033 s CPU 0.028 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.062 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.034 s CPU 0.025 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.060 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.034 s CPU 0.022 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.060 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.003 s | compute: SYCL0 0.034 s CPU 0.023 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.061 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.023 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.032 s
+1.19.686.921 I slot print_timing: id  0 | task 258 | n_gen =    100, tg =  14.73 t/s, tg_3s =  14.88 t/s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.064 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.026 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.062 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.024 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.060 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.022 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.059 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.021 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.064 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.027 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.064 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.027 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.063 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.027 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.063 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.026 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.065 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.065 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.028 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.036 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.036 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.038 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.076 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.039 s
+1.22.688.442 I slot print_timing: id  0 | task 258 | n_gen =    144, tg =  14.71 t/s, tg_3s =  14.66 t/s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.036 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.075 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.075 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.038 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.065 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.063 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.026 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.036 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.064 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.027 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.059 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.021 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.059 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.021 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.062 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.024 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.064 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.026 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.062 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.025 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.061 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.023 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.064 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.026 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.061 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.023 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.064 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.027 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.065 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.028 s
+1.25.700.823 I slot print_timing: id  0 | task 258 | n_gen =    188, tg =  14.68 t/s, tg_3s =  14.61 t/s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.076 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.040 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.075 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.064 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.027 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.065 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.028 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.065 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.028 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.028 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.064 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.028 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.065 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.028 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.065 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.028 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.063 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.026 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.063 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.026 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.065 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.028 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.063 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.026 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.064 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.027 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.064 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.028 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.065 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.028 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.062 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.024 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.064 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.026 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.036 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.075 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.042 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.038 s
+1.28.722.778 I slot print_timing: id  0 | task 258 | n_gen =    232, tg =  14.66 t/s, tg_3s =  14.56 t/s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.040 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.033 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.032 s CPU 0.037 s
+1.30.436.174 I slot print_timing: id  0 | task 258 | prompt eval time =     777.72 ms /    18 tokens (   43.21 ms per token,    23.14 tokens per second)
+1.30.436.178 I slot print_timing: id  0 | task 258 |        eval time =   17469.54 ms /   256 tokens (   68.51 ms per token,    14.60 tokens per second)
+1.30.436.179 I slot print_timing: id  0 | task 258 |       total time =   18247.26 ms /   274 tokens
+1.30.436.179 I slot print_timing: id  0 | task 258 |    graphs reused =        507
+1.30.436.191 I slot      release: id  0 | task 258 | stop processing: n_tokens = 273, truncated = 0
+1.30.436.199 I srv  update_slots: all slots are idle
+1.30.497.358 I srv  server_strea: conv_id= (empty=1)
+1.30.506.529 I slot get_availabl: id  0 | task -1 |  - checking sim = 0.000 (0/4759) > 0.100
+1.30.506.530 I slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 68216644820
+1.30.506.531 I srv  get_availabl: updating prompt cache
+1.30.506.584 I srv   prompt_save:  - saving prompt with length 273, total state size = 117.258 MiB (draft: 0.000 MiB)
+1.30.506.586 I srv         alloc:  - prompt is already in the cache, skipping
+1.30.506.587 I srv          load:  - looking for better prompt, base f_keep = 0.000, f_sim = 0.000
+1.30.506.587 I srv          load:    - prompt with length     273, lcp =       0, f_keep = 0.000, f_sim = 0.000
+1.30.506.589 I srv        update:  - cache state: 1 prompts, 229.829 MiB (limits: 8192.000 MiB, 16384 tokens, 16384 est)
+1.30.506.590 I srv        update:    - prompt 0x4002eda0:     273 tokens, checkpoints:  1,   229.829 MiB
+1.30.506.591 I srv  get_availabl: prompt cache update took 0.06 ms
+1.30.506.612 I slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> min-p -> ?xtc -> temp-ext -> dist 
+1.30.506.617 I slot launch_slot_: id  0 | task -1 | sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+	top_k = 20, top_p = 0.950, min_p = 0.050, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+1.30.506.618 I slot launch_slot_: id  0 | task 516 | processing task, is_child = 0
+1.30.506.622 I slot   operator(): id  0 | task 516 | new prompt, n_ctx_slot = 16384, n_keep = 0, task.n_tokens = 4759
+1.30.506.625 I slot   operator(): id  0 | task 516 | erased invalidated context checkpoint (pos_min = 13, pos_max = 13, n_tokens = 14, n_swa = 0, pos_next = 0, size = 112.571 MiB)
+1.30.512.061 I slot   operator(): id  0 | task 516 | cached n_tokens = 0, memory_seq_rm [0, end)
+[sched timing] graph 8942 nodes, 169 splits: wall 45.191 s | copies 37.792 s (0 MiB) | expert scan 0.009 s | other host 0.110 s | compute: SYCL0 3.814 s CPU 3.466 s
+2.15.723.573 I slot print_timing: id  0 | task 516 | prompt processing, n_tokens =   2048, progress = 0.43, t =  45.22 s / 45.29 tokens per second
+2.15.723.575 I slot   operator(): id  0 | task 516 | cached n_tokens = 2048, memory_seq_rm [2048, end)
+[sched timing] graph 8942 nodes, 169 splits: wall 11.723 s | copies 8.907 s (0 MiB) | expert scan 0.006 s | other host 0.047 s | compute: SYCL0 1.468 s CPU 1.295 s
+2.27.455.715 I slot print_timing: id  0 | task 516 | prompt processing, n_tokens =   2711, progress = 0.57, t =  56.95 s / 47.60 tokens per second
+2.27.455.717 I slot   operator(): id  0 | task 516 | cached n_tokens = 2711, memory_seq_rm [2711, end)
+2.27.488.055 I slot create_check: id  0 | task 516 | created context checkpoint 1 of 32 (pos_min = 2710, pos_max = 2710, n_tokens = 2711, size = 112.571 MiB)
+[sched timing] graph 8942 nodes, 169 splits: wall 16.185 s | copies 9.602 s (0 MiB) | expert scan 0.009 s | other host 0.161 s | compute: SYCL0 3.055 s CPU 3.358 s
+2.43.693.324 I slot print_timing: id  0 | task 516 | prompt processing, n_tokens =   4755, progress = 1.00, t =  73.19 s / 64.97 tokens per second
+2.43.693.326 I slot   operator(): id  0 | task 516 | cached n_tokens = 4755, memory_seq_rm [4755, end)
+2.43.693.777 I slot init_sampler: id  0 | task 516 | init sampler, took 0.42 ms, tokens: text = 4759, total = 4759
+2.43.726.703 I slot create_check: id  0 | task 516 | created context checkpoint 2 of 32 (pos_min = 4754, pos_max = 4754, n_tokens = 4755, size = 112.571 MiB)
+[sched timing] graph 8942 nodes, 122 splits: wall 0.215 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.009 s | compute: SYCL0 0.078 s CPU 0.129 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.079 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.079 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.040 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.076 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.038 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.093 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.054 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.087 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.048 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.084 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.046 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.079 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.080 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.042 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.087 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.048 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.079 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.040 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.079 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.091 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.053 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.076 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.038 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.040 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.080 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.080 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.075 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.036 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.091 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.054 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.095 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.056 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.097 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.059 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.092 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.054 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.083 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.045 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.088 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.050 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.092 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.053 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.089 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.051 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.088 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.051 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.085 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.047 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.080 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.076 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.036 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.076 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.038 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.083 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.045 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.084 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.046 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.092 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.053 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.080 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.042 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.075 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.086 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.048 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.076 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.076 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.038 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.075 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.093 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.054 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.040 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.076 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.037 s
+2.49.053.582 I slot print_timing: id  0 | task 516 | prompt eval time =   73441.25 ms /  4759 tokens (   15.43 ms per token,    64.80 tokens per second)
+2.49.053.584 I slot print_timing: id  0 | task 516 |        eval time =    5105.70 ms /    64 tokens (   81.04 ms per token,    12.34 tokens per second)
+2.49.053.585 I slot print_timing: id  0 | task 516 |       total time =   78546.95 ms /  4823 tokens
+2.49.053.586 I slot print_timing: id  0 | task 516 |    graphs reused =        569
+2.49.053.741 I slot      release: id  0 | task 516 | stop processing: n_tokens = 4822, truncated = 0
+2.49.053.750 I srv  update_slots: all slots are idle
+2.49.110.869 I srv  server_strea: conv_id= (empty=1)
+2.49.118.392 I slot get_availabl: id  0 | task -1 |  - checking sim = 1.000 (4759/4759) > 0.100
+2.49.118.394 I slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 1.000 (> 0.100 thold), f_keep = 0.987
+2.49.118.419 I slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> min-p -> ?xtc -> temp-ext -> dist 
+2.49.118.424 I slot launch_slot_: id  0 | task -1 | sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+	top_k = 20, top_p = 0.950, min_p = 0.050, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+2.49.118.425 I slot launch_slot_: id  0 | task 584 | processing task, is_child = 0
+2.49.118.429 I slot   operator(): id  0 | task 584 | new prompt, n_ctx_slot = 16384, n_keep = 0, task.n_tokens = 4759
+2.49.118.432 I slot   operator(): id  0 | task 584 | erased invalidated context checkpoint (pos_min = 2710, pos_max = 2710, n_tokens = 2711, n_swa = 0, pos_next = 0, size = 112.571 MiB)
+2.49.118.724 I slot   operator(): id  0 | task 584 | erased invalidated context checkpoint (pos_min = 4754, pos_max = 4754, n_tokens = 4755, n_swa = 0, pos_next = 0, size = 112.571 MiB)
+2.49.118.997 I slot   operator(): id  0 | task 584 | cached n_tokens = 0, memory_seq_rm [0, end)
+[sched timing] graph 8942 nodes, 169 splits: wall 12.036 s | copies 6.248 s (0 MiB) | expert scan 0.009 s | other host 0.109 s | compute: SYCL0 2.978 s CPU 2.692 s
+3.01.173.920 I slot print_timing: id  0 | task 584 | prompt processing, n_tokens =   2048, progress = 0.43, t =  12.06 s / 169.88 tokens per second
+3.01.173.922 I slot   operator(): id  0 | task 584 | cached n_tokens = 2048, memory_seq_rm [2048, end)
+[sched timing] graph 8942 nodes, 169 splits: wall 6.408 s | copies 4.870 s (0 MiB) | expert scan 0.006 s | other host 0.047 s | compute: SYCL0 1.299 s CPU 0.186 s
+3.07.590.058 I slot print_timing: id  0 | task 584 | prompt processing, n_tokens =   2711, progress = 0.57, t =  18.47 s / 146.77 tokens per second
+3.07.590.060 I slot   operator(): id  0 | task 584 | cached n_tokens = 2711, memory_seq_rm [2711, end)
+3.07.627.383 I slot create_check: id  0 | task 584 | created context checkpoint 1 of 32 (pos_min = 2710, pos_max = 2710, n_tokens = 2711, size = 112.571 MiB)
+[sched timing] graph 8942 nodes, 169 splits: wall 10.345 s | copies 6.342 s (0 MiB) | expert scan 0.009 s | other host 0.159 s | compute: SYCL0 3.015 s CPU 0.821 s
+3.17.992.919 I slot print_timing: id  0 | task 584 | prompt processing, n_tokens =   4755, progress = 1.00, t =  28.87 s / 164.68 tokens per second
+3.17.992.921 I slot   operator(): id  0 | task 584 | cached n_tokens = 4755, memory_seq_rm [4755, end)
+3.17.993.375 I slot init_sampler: id  0 | task 584 | init sampler, took 0.42 ms, tokens: text = 4759, total = 4759
+3.18.046.070 I slot create_check: id  0 | task 584 | created context checkpoint 2 of 32 (pos_min = 4754, pos_max = 4754, n_tokens = 4755, size = 112.571 MiB)
+[sched timing] graph 8942 nodes, 122 splits: wall 0.183 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.008 s | compute: SYCL0 0.062 s CPU 0.113 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.084 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.046 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.079 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.094 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.055 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.068 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.037 s CPU 0.026 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.037 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.028 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.085 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.046 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.026 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.080 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.079 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.040 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.036 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.075 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.036 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.040 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.079 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.036 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.040 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.076 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.075 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.037 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.076 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.038 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.036 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.090 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.052 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.079 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.041 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.084 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.046 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.037 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.029 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.075 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.036 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.038 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.034 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.070 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.031 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.038 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.081 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.042 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.027 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.067 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.037 s CPU 0.027 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.034 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.077 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.036 s CPU 0.038 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.072 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.033 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.071 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.032 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.078 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.039 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.069 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.030 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.074 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.035 s
+[sched timing] graph 8942 nodes, 122 splits: wall 0.073 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.004 s | compute: SYCL0 0.035 s CPU 0.034 s
+3.22.984.916 I slot print_timing: id  0 | task 584 | prompt eval time =   29116.87 ms /  4759 tokens (    6.12 ms per token,   163.44 tokens per second)
+3.22.984.919 I slot print_timing: id  0 | task 584 |        eval time =    4749.61 ms /    64 tokens (   75.39 ms per token,    13.26 tokens per second)
+3.22.984.919 I slot print_timing: id  0 | task 584 |       total time =   33866.48 ms /  4823 tokens
+3.22.984.920 I slot print_timing: id  0 | task 584 |    graphs reused =        631
+3.22.985.071 I slot      release: id  0 | task 584 | stop processing: n_tokens = 4822, truncated = 0
+3.22.985.079 I srv  update_slots: all slots are idle
+3.23.019.457 I srv    operator(): operator(): cleaning up before exit...
+3.23.025.319 I common_memory_breakdown_print: | memory breakdown [MiB]                     | total   free     self   model   context   compute    unaccounted |
+3.23.025.321 I common_memory_breakdown_print: |   - SYCL0 (Intel(R) Arc(TM) B580 Graphics) | 12216 = 1706 + (10023 =  8164 +     393 +    1466) +         486 |
+3.23.025.322 I common_memory_breakdown_print: |   - Host                                   |                 77815 = 77571 +       0 +     244                |

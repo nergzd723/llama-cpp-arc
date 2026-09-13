@@ -1,0 +1,17 @@
+== sycl-f4-s40-p4-ub2048: SLOTS=40 THREADS=auto ASYNC_CPU=0 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: GGML_SCHED_PREFETCH_EXPERTS=4 GGML_SCHED_PREFETCH_AHEAD=3 
+   up in 34s; init_moe_expert_cache: expert cache: 48 layers x 40 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 169 (with bs=2048), 122 (with bs=1)
+   VRAM: (12216 MiB, 2695 MiB free)
+sycl-f4-s40-p4-ub2048 prefill1: prompt 4759 tok in 134.7s = 35.3 tok/s | decode 64 tok @ 9.56 tok/s | disk read max 450314 KB/s, mean 354099 KB/s | GPU MHz mean 2607 max 2850
+sycl-f4-s40-p4-ub2048 prefill2: prompt 4759 tok in 31.3s = 152.2 tok/s | decode 64 tok @ 12.89 tok/s | disk read max 302554 KB/s, mean 58335 KB/s | GPU MHz mean 2400 max 2850
+== sycl-f4-s40-p4-ub2048 done (215s)
+   prefetch: 
+== sycl-f4-s32-p6-ub2048: SLOTS=32 THREADS=auto ASYNC_CPU=0 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: GGML_SCHED_PREFETCH_EXPERTS=6 GGML_SCHED_PREFETCH_AHEAD=5 
+   up in 34s; init_moe_expert_cache: expert cache: 48 layers x 32 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 169 (with bs=2048), 122 (with bs=1)
+   VRAM: (12216 MiB, 3373 MiB free)
+sycl-f4-s32-p6-ub2048 prefill1: prompt 4759 tok in 97.5s = 48.8 tok/s | decode 64 tok @ 8.21 tok/s | disk read max 445818 KB/s, mean 289699 KB/s | GPU MHz mean 2474 max 2850
+sycl-f4-s32-p6-ub2048 prefill2: prompt 4759 tok in 29.6s = 160.8 tok/s | decode 64 tok @ 12.44 tok/s | disk read max 289398 KB/s, mean 50954 KB/s | GPU MHz mean 2375 max 2850
+== sycl-f4-s32-p6-ub2048 done (176s)
+   prefetch: 
+BATCH35 DONE

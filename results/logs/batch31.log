@@ -1,0 +1,41 @@
+== vulkan build exit 0 after 296s
+== vulkan perplexity built
+Terminated                 cmake --build build-sycl --target llama-perplexity -j12 > /dev/null 2>&1
+== vk-routing-cache48-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=0 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build/bin extra: -ub 2048 env: GGML_SCHED_TIMING=1 GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 41s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 1495.05 MiB | graph splits = 145 (with bs=2048), 98 (with bs=1)
+   VRAM: (12216 MiB, 1857 MiB free)
+vk-routing-cache48-ub2048 prefill1: prompt 4759 tok in 21.9s = 217.1 tok/s | decode 64 tok @ 8.74 tok/s | disk read max 249962 KB/s, mean 60964 KB/s | GPU MHz mean 1587 max 2850
+vk-routing-cache48-ub2048 prefill2: prompt 4759 tok in 20.5s = 232.3 tok/s | decode 64 tok @ 1.29 tok/s | disk read max 47296 KB/s, mean 3960 KB/s | GPU MHz mean 521 max 2850
+vk-routing-cache48-ub2048: generated '//////'
+Traceback (most recent call last):
+  File "<stdin>", line 7, in <module>
+  File "<stdin>", line 7, in <genexpr>
+TypeError: must be real number, not NoneType
+== vk-routing-cache48-ub2048 done (147s)
+== vulkan cache48 routing (pass 2 graphs):
+[sched timing] graph 8894 nodes, 98 splits: wall 1.066 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.029 s | compute: Vulkan0 0.161 s CPU 0.876 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 2.339 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.034 s | compute: Vulkan0 1.166 s CPU 1.139 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8894 nodes, 98 splits: wall 1.026 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.025 s | compute: Vulkan0 0.277 s CPU 0.724 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+== vk-routing-nocache-ub2048: SLOTS=0 THREADS=auto ASYNC_CPU=0 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build/bin extra: -ub 2048 env: GGML_SCHED_TIMING=1 GGML_VK_DISABLE_GRAPH_OPTIMIZE=1 
+   up in 4s; init_moe_expert_cache: expert cache: 48 layers x 0 slots, ... uploaded to Vulkan0' in the log
+   Vulkan0 model buffer size = 3816.11 MiB | Vulkan0 compute buffer size = 1502.28 MiB | graph splits = 145 (with bs=2048), 98 (with bs=1)
+   VRAM: (12216 MiB, 5764 MiB free)
+vk-routing-nocache-ub2048 prefill1: prompt 4759 tok in 175.6s = 27.1 tok/s | decode 64 tok @ 3.50 tok/s | disk read max 519514 KB/s, mean 195434 KB/s | GPU MHz mean 809 max 2850
+vk-routing-nocache-ub2048 prefill2: prompt 4759 tok in 206.3s = 23.1 tok/s | decode 64 tok @ 4.73 tok/s | disk read max 451648 KB/s, mean 246932 KB/s | GPU MHz mean 1428 max 2850
+vk-routing-nocache-ub2048: generated '\n\n<think>\n\n</think>\n\nHere'
+  tok0: '\n\n'=0.9893  ''=0.0050  '\n'=0.0016  '\n\n\n'=0.0007
+  tok1: '<think>'=0.8335  'Below'=0.1087  'Here'=0.0364  '```'=0.0092
+  tok2: '\n\n'=0.9972  '\n'=0.0028  ' \n\n'=0.0000  '\n    \n'=0.0000
+  tok3: '</think>'=1.0000  '*'=0.0000  '```'=0.0000  '<think>'=0.0000
+  tok4: '\n\n'=1.0000  ' a'=0.0000  ' to'=0.0000  '\n\n\n'=0.0000
+  tok5: 'Here'=0.8627  '```'=0.1073  '#'=0.0172  'To'=0.0036
+== vk-routing-nocache-ub2048 done (423s)
+== vulkan no-cache routing (pass 2 graphs):
+[sched timing] graph 8414 nodes, 145 splits: wall 76.555 s | copies 60.955 s (36959 MiB) | expert scan 1.500 s | other host 0.013 s | compute: Vulkan0 9.482 s CPU 4.606 s | routing: 47 ids tensors, cold rows 960680 of 960680, used cold experts 19572
+[sched timing] graph 8414 nodes, 98 splits: wall 1.014 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.011 s | compute: Vulkan0 0.149 s CPU 0.854 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+[sched timing] graph 8414 nodes, 98 splits: wall 2.996 s | copies 0.000 s (0 MiB) | expert scan 0.000 s | other host 0.035 s | compute: Vulkan0 1.119 s CPU 1.843 s | routing: 0 ids tensors, cold rows 0 of 0, used cold experts 0
+== ppl vulkan-cache48:  (40s)
+== ppl vulkan-nocache: Final estimate: PPL = 6.0695 +/- 0.34969 (209s)
+== ppl sycl-cache48:  (47s)
+BATCH31 DONE

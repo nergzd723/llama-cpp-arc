@@ -1,0 +1,16 @@
+[  0%] Built target llama-common-base
+[  0%] Built target cpp-httplib
+[  2%] Built target ggml-base
+[  6%] Built target ggml-cpu
+[ 36%] Built target ggml-sycl
+[ 37%] Linking CXX shared library ../../bin/libggml.so
+[ 37%] Built target ggml
+[ 37%] Linking CXX shared library ../bin/libllama.so
+[ 88%] Built target llama
+[ 88%] Linking CXX shared library ../bin/libllama-common.so
+[ 98%] Built target llama-common
+[ 98%] Building CXX object tools/perplexity/CMakeFiles/llama-perplexity-impl.dir/perplexity.cpp.o
+Linking CXX shared library ../../bin/libllama-perplexity-impl.so
+Built target llama-perplexity-impl
+Linking CXX executable ../../bin/llama-perplexity
+Built target llama-perplexity

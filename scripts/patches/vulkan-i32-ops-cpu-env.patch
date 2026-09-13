@@ -1,0 +1,30 @@
+diff --git a/ggml/src/ggml-vulkan/ggml-vulkan.cpp b/ggml/src/ggml-vulkan/ggml-vulkan.cpp
+index a04a6b2..968efa2 100644
+--- a/ggml/src/ggml-vulkan/ggml-vulkan.cpp
++++ b/ggml/src/ggml-vulkan/ggml-vulkan.cpp
+@@ -18751,6 +18751,11 @@ static bool ggml_backend_vk_device_supports_op(ggml_backend_dev_t dev, const ggm
+             }
+         case GGML_OP_GET_ROWS:
+             {
++                // GGML_VK_I32_ROWS_CPU=1: leave I32 lookups (the MoE expert cache's slot maps) to the CPU
++                static const bool i32_rows_cpu = getenv("GGML_VK_I32_ROWS_CPU") != nullptr && atoi(getenv("GGML_VK_I32_ROWS_CPU")) != 0;
++                if (i32_rows_cpu && op->src[0]->type == GGML_TYPE_I32) {
++                    return false;
++                }
+                 switch (op->src[0]->type) {
+                     case GGML_TYPE_F32:
+                     case GGML_TYPE_F16:
+@@ -18812,6 +18817,13 @@ static bool ggml_backend_vk_device_supports_op(ggml_backend_dev_t dev, const ggm
+             }
+         case GGML_OP_CONT:
+         case GGML_OP_CPY:
++            // GGML_VK_I32_CPY_CPU=1: leave I32 copies (the contiguous routing ids) to the CPU
++            if (op->src[0]->type == GGML_TYPE_I32) {
++                static const bool i32_cpy_cpu = getenv("GGML_VK_I32_CPY_CPU") != nullptr && atoi(getenv("GGML_VK_I32_CPY_CPU")) != 0;
++                if (i32_cpy_cpu) {
++                    return false;
++                }
++            }
+         case GGML_OP_DUP:
+             {
+                 ggml_type src0_type = op->src[0]->type;

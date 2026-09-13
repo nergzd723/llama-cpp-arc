@@ -1,0 +1,11 @@
+0.24.378.705 I cmn          init: llama threadpool init, n_threads = 6
+0.27.659.487 I 
+0.27.659.550 I system_info: n_threads = 6 (n_threads_batch = 6) / 12 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | 
+0.27.659.562 I perplexity: tokenizing the input ..
+0.27.667.166 I perplexity: tokenization took 7.602 ms
+0.27.667.218 I perplexity: calculating perplexity over 2 chunks, n_ctx=2048, batch_size=2048, n_seq=1
+1.33.399.165 I perplexity: 65.73 seconds per pass - ETA 2.18 minutes
+[1]6.6842,[2]6.1082,
+2.50.531.546 I Final estimate: PPL = 6.1082 +/- 0.35190
+
+2.50.549.704 W ~llama_context:    Vulkan0 compute buffer size of 2012.0391 MiB, does not match expectation of 3211.8311 MiB

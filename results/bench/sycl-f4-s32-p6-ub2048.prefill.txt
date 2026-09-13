@@ -1,0 +1,11 @@
+
+
+<think>
+The user wants two things:
+1. A ten-bullet-point summary of the document
+2. A list of every command the document tells the reader to run
+
+Let me carefully go through the document and extract both.
+
+For the summary, I need to capture the key points:
+- What
