@@ -1,0 +1,5 @@
+== build exit 2 after 9s
+/mnt/slopper/llama-cpp-arc/llama.cpp/ggml/src/ggml-sycl/ggml-sycl.cpp:6403:25: error: use of undeclared identifier 'ggml_sycl_op_timing_enabled'
+/mnt/slopper/llama-cpp-arc/llama.cpp/ggml/src/ggml-sycl/ggml-sycl.cpp:6410:35: error: use of undeclared identifier 'ggml_sycl_op_timing_add_copy'
+1 warning and 2 errors generated.
+== sycl-timing-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: GGML_SYCL_OP_TIMING=1 

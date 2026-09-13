@@ -1,8 +1,17 @@
 diff --git a/ggml/src/ggml-sycl/ggml-sycl.cpp b/ggml/src/ggml-sycl/ggml-sycl.cpp
-index 4b8e03b..38bee8b 100644
+index 4b8e03b..19a1e7a 100644
 --- a/ggml/src/ggml-sycl/ggml-sycl.cpp
 +++ b/ggml/src/ggml-sycl/ggml-sycl.cpp
-@@ -52,6 +52,8 @@
+@@ -11,6 +11,8 @@
+ //
+ 
+ #include <algorithm>
++static bool ggml_sycl_op_timing_enabled();
++static void ggml_sycl_op_timing_add_copy(double s, size_t bytes);
+ #include <array>
+ #include <assert.h>
+ #include <atomic>
+@@ -52,6 +54,8 @@
  
  #include "ggml.h"
  #include "ggml-sycl.h"
@@ -11,14 +20,10 @@ index 4b8e03b..38bee8b 100644
  #include "ggml-impl.h"
  #include "ggml-backend-impl.h"
  
-@@ -4990,6 +4992,648 @@ static int64_t mmid_counting_sort_rows(
-         }
-     }
+@@ -4992,6 +4996,645 @@ static int64_t mmid_counting_sort_rows(
      return n_used;
-+<<<<<<< Updated upstream
-+=======
-+}
-+
+ }
+ 
 +// Multi-row MoE GEMV path for batched mul_mat_id (prefill), no fp16 dequantize. The routed
 +// rows are gathered in expert order, quantized to Q8_1 once, cut into groups of up to
 +// MMID_NCOLS rows per expert, and one launch per weight tensor dots every quantized weight
@@ -656,11 +661,12 @@ index 4b8e03b..38bee8b 100644
 +    }
 +    SYCL_CHECK(CHECK_TRY_ERROR(stream->wait()));
 +    return true;
-+>>>>>>> Stashed changes
- }
- 
++}
++
  static void ggml_sycl_mul_mat_id(ggml_backend_sycl_context & ctx,
-@@ -5071,6 +5715,18 @@ static void ggml_sycl_mul_mat_id(ggml_backend_sycl_context & ctx,
+                                  ggml_tensor *dst) try {
+     scope_op_debug_print scope_dbg_print(__func__, dst, /*num_src=*/3);
+@@ -5071,6 +5714,18 @@ static void ggml_sycl_mul_mat_id(ggml_backend_sycl_context & ctx,
              }
          }
      } else {
@@ -679,7 +685,7 @@ index 4b8e03b..38bee8b 100644
          const int64_t n_routed_rows = ids->ne[1] * n_ids;
          ggml_sycl_pool_alloc<char> src1_contiguous(ctx.pool(), sizeof(float)*n_routed_rows*ne10);
          ggml_sycl_pool_alloc<char>  dst_contiguous(ctx.pool(), sizeof(float)*n_routed_rows*ne0);
-@@ -5686,6 +6342,55 @@ static void ggml_backend_sycl_free(ggml_backend_t backend) {
+@@ -5686,6 +6341,55 @@ static void ggml_backend_sycl_free(ggml_backend_t backend) {
      delete backend;
  }
  
@@ -735,16 +741,98 @@ index 4b8e03b..38bee8b 100644
  static void ggml_backend_sycl_set_tensor_async(ggml_backend_t backend,
                                                 ggml_tensor *tensor,
                                                 const void *data, size_t offset,
-@@ -5698,6 +6403,9 @@ static void ggml_backend_sycl_set_tensor_async(ggml_backend_t backend,
+@@ -5698,8 +6402,14 @@ static void ggml_backend_sycl_set_tensor_async(ggml_backend_t backend,
  
      GGML_ASSERT(buf->buft == ggml_backend_sycl_buffer_type(sycl_ctx->device) && "unsupported buffer type");
      const queue_ptr stream = sycl_ctx->stream(sycl_ctx->device, 0);
-+    if (ggml_sycl_upload_pageable(stream, sycl_ctx->device, (char *) tensor->data + offset, data, size)) {
-+        return;
+-    SYCL_CHECK(CHECK_TRY_ERROR(
+-        (stream)->memcpy((char *)tensor->data + offset, data, size)));
++    const bool timing = ggml_sycl_op_timing_enabled();
++    std::chrono::steady_clock::time_point t0;
++    if (timing) { stream->wait(); t0 = std::chrono::steady_clock::now(); }
++    if (!ggml_sycl_upload_pageable(stream, sycl_ctx->device, (char *) tensor->data + offset, data, size)) {
++        SYCL_CHECK(CHECK_TRY_ERROR(
++            (stream)->memcpy((char *)tensor->data + offset, data, size)));
 +    }
-     SYCL_CHECK(CHECK_TRY_ERROR(
-         (stream)->memcpy((char *)tensor->data + offset, data, size)));
++    if (timing) { stream->wait(); ggml_sycl_op_timing_add_copy(std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count(), size); }
  }
+ catch (sycl::exception const &exc) {
+   std::cerr << exc.what() << "Exception caught at file:" << __FILE__
+@@ -5850,9 +6560,53 @@ static int ggml_sycl_try_gdn_cache_fusion(const ggml_cgraph * cgraph, int node_i
+     return skip;
+ }
+ 
++// GGML_SYCL_OP_TIMING=1: per-op wall time on the device queue (with a wait around every node)
++// and the time spent in host-to-device tensor uploads, printed after every prefill-sized graph.
++#include <chrono>
++#include <map>
++struct ggml_sycl_op_timing_state {
++    std::map<std::string, double> by_op;
++    double copy_s = 0; size_t copy_bytes = 0; int copies = 0;
++};
++static ggml_sycl_op_timing_state g_sycl_timing;
++static bool ggml_sycl_op_timing_enabled() { static const bool e = getenv("GGML_SYCL_OP_TIMING") != nullptr; return e; }
++static void ggml_sycl_op_timing_add_copy(double s, size_t bytes) { g_sycl_timing.copy_s += s; g_sycl_timing.copy_bytes += bytes; g_sycl_timing.copies++; }
++static void ggml_sycl_op_timing_report(int n_nodes) {
++    double total = 0;
++    for (auto & kv : g_sycl_timing.by_op) total += kv.second;
++    std::vector<std::pair<double, std::string>> v;
++    for (auto & kv : g_sycl_timing.by_op) v.push_back({kv.second, kv.first});
++    std::sort(v.rbegin(), v.rend());
++    fprintf(stderr, "[SYCL timing] graph %d nodes: device ops %.3f s, uploads %.3f s (%zu MiB in %d copies, %.2f GB/s)\n",
++            n_nodes, total, g_sycl_timing.copy_s, g_sycl_timing.copy_bytes >> 20, g_sycl_timing.copies,
++            g_sycl_timing.copy_s > 0 ? g_sycl_timing.copy_bytes / g_sycl_timing.copy_s / 1e9 : 0.0);
++    for (size_t i = 0; i < v.size() && i < 14; i++) {
++        fprintf(stderr, "[SYCL timing]   %-40s %8.3f s  %5.1f%%\n", v[i].second.c_str(), v[i].first, 100.0 * v[i].first / total);
++    }
++    g_sycl_timing = ggml_sycl_op_timing_state();
++}
++static std::string ggml_sycl_op_timing_desc(const ggml_tensor * node) {
++    std::string d = ggml_op_desc(node);
++    if (node->op == GGML_OP_MUL_MAT_ID && node->src[0]) {
++        d += node->src[0]->ne[2] > 64 ? "(cold experts)" : "(hot pack)";
++    } else if (node->op == GGML_OP_MUL_MAT && node->src[0]) {
++        d += std::string("(") + ggml_type_name(node->src[0]->type) + ")";
++    }
++    return d;
++}
++
+ static void ggml_backend_sycl_graph_compute_impl(ggml_backend_sycl_context * sycl_ctx, ggml_cgraph * cgraph) {
+     ggml_sycl_set_main_device(sycl_ctx->device);
+ 
++    const bool timing = ggml_sycl_op_timing_enabled();
++    std::string prev_desc; std::chrono::steady_clock::time_point t_prev;
++    auto checkpoint = [&](const ggml_tensor * next) {
++        sycl_ctx->stream()->wait();
++        const auto t = std::chrono::steady_clock::now();
++        if (!prev_desc.empty()) { g_sycl_timing.by_op[prev_desc] += std::chrono::duration<double>(t - t_prev).count(); }
++        prev_desc = next ? ggml_sycl_op_timing_desc(next) : std::string();
++        t_prev = std::chrono::steady_clock::now();
++    };
+     for (int i = 0; i < cgraph->n_nodes; i++) {
+         ggml_tensor * node = cgraph->nodes[i];
+         if (ggml_sycl_is_view_or_noop(node)) {
+@@ -5861,6 +6615,7 @@ static void ggml_backend_sycl_graph_compute_impl(ggml_backend_sycl_context * syc
+         if ((node->flags & GGML_TENSOR_FLAG_COMPUTE) == 0) {
+             continue;
+         }
++        if (timing) { checkpoint(node); }
+ 
+         const int nodes_to_skip = ggml_sycl_fuse(*sycl_ctx, cgraph, i);
+         if (nodes_to_skip != 0) {
+@@ -5909,6 +6664,12 @@ static void ggml_backend_sycl_graph_compute_impl(ggml_backend_sycl_context * syc
+         }
+         GGML_ASSERT(ok);
+     }
++    if (timing) {
++        checkpoint(nullptr);
++        // one graph per split; report once the whole (prefill-sized) forward pass has gone through
++        static int nodes_seen = 0; nodes_seen += cgraph->n_nodes;
++        if (nodes_seen >= 5000) { ggml_sycl_op_timing_report(nodes_seen); nodes_seen = 0; }
++    }
+ }
+ 
+ #ifdef GGML_SYCL_GRAPH
 diff --git a/ggml/src/ggml-sycl/mmvq.cpp b/ggml/src/ggml-sycl/mmvq.cpp
 index d89dd92..002dbb2 100644
 --- a/ggml/src/ggml-sycl/mmvq.cpp
