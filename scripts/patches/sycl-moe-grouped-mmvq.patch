@@ -1090,10 +1090,10 @@ index 9d2f564..786053f 100644
  // vy: src1 quantized with quantize_and_reorder_q8_1_soa (per-row SoA). Returns false if src0_type isn't handled.
 diff --git a/ggml/src/ggml-sycl/moe-xmx.cpp b/ggml/src/ggml-sycl/moe-xmx.cpp
 new file mode 100644
-index 0000000..3d6a73a6
+index 0000000..fea7822
 --- /dev/null
 +++ b/ggml/src/ggml-sycl/moe-xmx.cpp
-@@ -0,0 +1,128 @@
+@@ -0,0 +1,151 @@
 +#include "moe-xmx.hpp"
 +#include "ggml.h"
 +#include "dequantize.hpp"
@@ -1138,6 +1138,27 @@ index 0000000..3d6a73a6
 +#pragma unroll
 +            for (int j = 0; j < 8; j++) {
 +                out[8*il + j] = (sycl::half) (dl * g[j] * ((signs & kmask_iq2xs[j]) ? -1.f : 1.f));
++            }
++        }
++    }
++};
++
++template <> struct moe_xmx_decoder<block_iq3_s> {
++    static constexpr int K_BLOCK = QK_K;
++    static __dpct_inline__ void decode32(const block_iq3_s * row_blocks, int k0, sycl::half * out) {
++        const block_iq3_s & b = row_blocks[k0 / QK_K];
++        const int ib = (k0 % QK_K) / 32;
++        const float d = (float) b.d * (1 + 2 * ((b.scales[ib/2] >> (4 * (ib % 2))) & 0xf));
++        const uint8_t * qs = b.qs + 8*ib;
++#pragma unroll
++        for (int il = 0; il < 4; il++) {
++            const uint8_t * g1 = (const uint8_t *) (iq3s_grid + (qs[2*il + 0] | ((b.qh[ib] << (8 - 2*il)) & 256)));
++            const uint8_t * g2 = (const uint8_t *) (iq3s_grid + (qs[2*il + 1] | ((b.qh[ib] << (7 - 2*il)) & 256)));
++            const uint8_t signs = b.signs[4*ib + il];
++#pragma unroll
++            for (int j = 0; j < 4; j++) {
++                out[8*il + j]     = (sycl::half) (d * g1[j] * ((signs & kmask_iq2xs[j])     ? -1.f : 1.f));
++                out[8*il + 4 + j] = (sycl::half) (d * g2[j] * ((signs & kmask_iq2xs[j + 4]) ? -1.f : 1.f));
 +            }
 +        }
 +    }
@@ -1208,6 +1229,7 @@ index 0000000..3d6a73a6
 +    }
 +    switch (src0_type) {
 +        case GGML_TYPE_IQ2_S:  return K % QK_K == 0;
++        case GGML_TYPE_IQ3_S:  return K % QK_K == 0;
 +        case GGML_TYPE_IQ4_NL: return true;
 +        default:               return false;
 +    }
@@ -1218,6 +1240,7 @@ index 0000000..3d6a73a6
 +                       int64_t M, int64_t K, dpct::queue_ptr stream) {
 +    switch (src0_type) {
 +        case GGML_TYPE_IQ2_S:  moe_xmx_launch<block_iq2_s>(vx_base, expert_stride_bytes, A, C, tiles, n_tiles, M, K, stream); break;
++        case GGML_TYPE_IQ3_S:  moe_xmx_launch<block_iq3_s>(vx_base, expert_stride_bytes, A, C, tiles, n_tiles, M, K, stream); break;
 +        case GGML_TYPE_IQ4_NL: moe_xmx_launch<block_iq4_nl>(vx_base, expert_stride_bytes, A, C, tiles, n_tiles, M, K, stream); break;
 +        default: GGML_ABORT("moe_xmx: unsupported type");
 +    }

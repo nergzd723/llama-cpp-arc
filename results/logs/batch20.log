@@ -1,0 +1,34 @@
+== build exit 0 after 47s
+0
+== op test: OK 724, FAIL 0, iq3_s cases 4
+== sycl-iq3s-async0-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=0 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: 
+   up in 69s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 169 (with bs=2048), 122 (with bs=1)
+   VRAM: (12216 MiB, 1971 MiB free)
+sycl-iq3s-async0-ub2048 run1: prompt 18 tok @ 7.5 tok/s   decode 256 tok @ 9.59 tok/s
+sycl-iq3s-async0-ub2048 run2: prompt 18 tok @ 22.4 tok/s   decode 256 tok @ 14.72 tok/s
+sycl-iq3s-async0-ub2048 prefill1: prompt 4759 tok in 61.5s = 77.3 tok/s | decode 64 tok @ 12.13 tok/s | disk read max 363710 KB/s, mean 188213 KB/s | GPU MHz mean 2431 max 2850
+sycl-iq3s-async0-ub2048 prefill2: prompt 4759 tok in 32.0s = 148.7 tok/s | decode 64 tok @ 13.37 tok/s | disk read max 66102 KB/s, mean 14166 KB/s | GPU MHz mean 2400 max 2850
+sycl-iq3s-async0-ub2048: generated '\n\n<think>\n\n</think>\n\nHere'
+  tok0: '\n\n'=0.9923  '\n'=0.0017  ''=0.0013  '\n\n\n'=0.0011
+  tok1: '<think>'=0.7130  'Below'=0.2210  'Here'=0.0419  '```'=0.0100
+  tok2: '\n\n'=0.9936  '\n'=0.0064  ' \n\n'=0.0000  '\n \n'=0.0000
+  tok3: '</think>'=1.0000  '*'=0.0000  '<think>'=0.0000  '*('=0.0000
+  tok4: '\n\n'=1.0000  ' a'=0.0000  '\n\n\n'=0.0000  ','=0.0000
+  tok5: 'Here'=0.8458  '```'=0.1127  '#'=0.0277  '###'=0.0026
+== sycl-iq3s-async0-ub2048 done (224s)
+== sycl-iq3s-async1-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=1 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: 
+   up in 30s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 1466.28 MiB | graph splits = 171 (with bs=2048), 218 (with bs=1)
+   VRAM: (12216 MiB, 1971 MiB free)
+sycl-iq3s-async1-ub2048 prefill1: prompt 4759 tok in 75.3s = 63.2 tok/s | decode 64 tok @ 9.55 tok/s | disk read max 370160 KB/s, mean 133161 KB/s | GPU MHz mean 2433 max 2850
+sycl-iq3s-async1-ub2048 prefill2: prompt 4759 tok in 28.7s = 166.1 tok/s | decode 64 tok @ 11.44 tok/s | disk read max 39648 KB/s, mean 9370 KB/s | GPU MHz mean 2517 max 2850
+== sycl-iq3s-async1-ub2048 done (147s)
+== sycl-iq3s-async0-ub4096: SLOTS=48 THREADS=auto ASYNC_CPU=0 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -b 4096 -ub 4096 env: 
+   up in 34s; init_moe_expert_cache: expert cache: 48 layers x 48 slots, ... uploaded to Vulkan0' in the log
+   SYCL0 model buffer size = 3816.16 MiB | SYCL0 compute buffer size = 2432.56 MiB | graph splits = 169 (with bs=4096), 122 (with bs=1)
+   VRAM: (12216 MiB, 1004 MiB free)
+sycl-iq3s-async0-ub4096 prefill1: prompt 4759 tok in 122.3s = 38.9 tok/s | decode 64 tok @ 9.08 tok/s | disk read max 387090 KB/s, mean 126318 KB/s | GPU MHz mean 2584 max 2850
+sycl-iq3s-async0-ub4096 prefill2: prompt 4759 tok in 27.2s = 174.9 tok/s | decode 64 tok @ 13.61 tok/s | disk read max 41704 KB/s, mean 17801 KB/s | GPU MHz mean 2494 max 2850
+== sycl-iq3s-async0-ub4096 done (197s)
+BATCH20 DONE

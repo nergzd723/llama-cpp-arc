@@ -1,0 +1,1 @@
+== sycl-staged2-ub2048: SLOTS=48 THREADS=auto ASYNC_CPU=0 USE_MTP=0 CTX=16384 BIN=/mnt/slopper/llama-cpp-arc/llama.cpp/build-sycl/bin extra: -ub 2048 env: GGML_SYCL_STAGED_UPLOAD=1 GGML_SCHED_TIMING=1 
